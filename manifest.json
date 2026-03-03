@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "DeepSeek Exporter",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "description": "Export conversations from DeepSeek AI",
       "permissions": [
     "activeTab",
@@ -35,11 +35,5 @@
     "48": "icon48.png",
     "128": "icon128.png"
   },
-  "options_page": "options.html",
-  "web_accessible_resources": [
-    {
-      "resources": ["browse.html"],
-      "matches": ["<all_urls>"]
-    }
-  ]
+  "web_accessible_resources": []
   }

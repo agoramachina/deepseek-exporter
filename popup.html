@@ -127,13 +127,30 @@
       color: var(--text-color);
       font-size: 12px;
     }
+    #popup-header {
+      margin: -8px -8px 8px -8px;
+      padding: 14px 16px;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+      text-align: center;
+    }
+    #header-title {
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    #header-version {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 11px;
+      margin-top: 3px;
+    }
   </style>
 </head>
 <body>
-  <div style="margin: -8px -8px 8px -8px;">
-    <img src="popup-header.png" alt="DeepSeek Chat Exporter" style="width: 100%; height: auto; display: block;">
+  <div id="popup-header">
+    <div id="header-title">DeepSeek Chat Exporter</div>
+    <div id="header-version"></div>
   </div>
-
   <div style="padding: 0 5px;">
 
     <div class="options">

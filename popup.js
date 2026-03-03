@@ -1,111 +1,82 @@
-// Get organization ID from storage
-async function getOrgId() {
-  return new Promise((resolve) => {
-    chrome.storage.sync.get(['organizationId'], (result) => {
-      resolve(result.organizationId);
-    });
-  });
+// Get current conversation ID from URL
+async function getCurrentConversationId() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const url = new URL(tab.url);
+  const match = url.pathname.match(/\/a\/chat\/s\/([a-f0-9-]+)/);
+  return match ? match[1] : null;
 }
 
-// Check if org ID is configured on popup load
-document.addEventListener('DOMContentLoaded', async () => {
-  const orgId = await getOrgId();
-  if (!orgId) {
-    document.getElementById('setupNotice').style.display = 'block';
-    document.getElementById('exportCurrent').disabled = true;
-    document.getElementById('exportAll').disabled = true;
-  }
+// Show status message
+function showStatus(message, type = 'info') {
+  const statusEl = document.getElementById('status');
+  statusEl.className = `status ${type}`;
+  statusEl.textContent = message;
 
-  // Handle checkbox dependencies
+  if (type === 'success') {
+    setTimeout(() => {
+      statusEl.textContent = '';
+      statusEl.className = '';
+    }, 3000);
+  }
+}
+
+// Handle checkbox dependencies on popup load
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('header-version').textContent = 'v' + chrome.runtime.getManifest().version;
+  const formatSelect = document.getElementById('format');
   const includeChatsCheckbox = document.getElementById('includeChats');
   const includeThinkingCheckbox = document.getElementById('includeThinking');
   const includeMetadataCheckbox = document.getElementById('includeMetadata');
-  const includeArtifactsCheckbox = document.getElementById('includeArtifacts');
 
   function updateCheckboxStates() {
-    const chatsEnabled = includeChatsCheckbox.checked;
+    const isJson = formatSelect.value === 'json';
+    const chatsEnabled = !isJson && includeChatsCheckbox.checked;
 
-    // Disable thinking, metadata and inline artifacts when chats is unchecked
-    includeThinkingCheckbox.disabled = !chatsEnabled;
-    includeMetadataCheckbox.disabled = !chatsEnabled;
-    includeArtifactsCheckbox.disabled = !chatsEnabled;
+    // Disable all content options when JSON is selected
+    includeChatsCheckbox.disabled = isJson;
+    includeThinkingCheckbox.disabled = isJson || !chatsEnabled;
+    includeMetadataCheckbox.disabled = isJson || !chatsEnabled;
 
-    // Optionally uncheck them when disabled
-    if (!chatsEnabled) {
+    if (isJson || !chatsEnabled) {
       includeThinkingCheckbox.checked = false;
       includeMetadataCheckbox.checked = false;
-      includeArtifactsCheckbox.checked = false;
+    }
+    if (isJson) {
+      includeChatsCheckbox.checked = false;
     }
   }
 
+  formatSelect.addEventListener('change', updateCheckboxStates);
   includeChatsCheckbox.addEventListener('change', updateCheckboxStates);
   updateCheckboxStates(); // Initialize on load
 });
 
-// Handle options link click
-document.getElementById('openOptions').addEventListener('click', (e) => {
-  e.preventDefault();
-  chrome.runtime.openOptionsPage();
-});
-  
-  // Get current conversation ID from URL
-  async function getCurrentConversationId() {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    const url = new URL(tab.url);
-    const match = url.pathname.match(/\/chat\/([a-f0-9-]+)/);
-    return match ? match[1] : null;
-  }
-  
-  // Show status message
-  function showStatus(message, type = 'info') {
-    const statusEl = document.getElementById('status');
-    statusEl.className = `status ${type}`;
-    statusEl.textContent = message;
-    
-    if (type === 'success') {
-      setTimeout(() => {
-        statusEl.textContent = '';
-        statusEl.className = '';
-      }, 3000);
-    }
-  }
-  
-  // Export current conversation
+// Export current conversation
 document.getElementById('exportCurrent').addEventListener('click', async () => {
   const button = document.getElementById('exportCurrent');
   button.disabled = true;
   showStatus('Fetching conversation...', 'info');
-  
+
   try {
-    const orgId = await getOrgId();
     const conversationId = await getCurrentConversationId();
-    
-    if (!orgId) {
-      throw new Error('Organization ID not configured. Click the setup link above to configure it.');
-    }
+
     if (!conversationId) {
-      throw new Error('Could not detect conversation ID. Make sure you are on a Claude.ai conversation page.');
+      throw new Error('Could not detect conversation ID. Make sure you are on a DeepSeek conversation page.');
     }
-    
+
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    
-    // Check if we're on Claude.ai
-    if (!tab.url.includes('claude.ai')) {
-      throw new Error('Please navigate to a Claude.ai conversation page first.');
+
+    if (!tab.url.includes('chat.deepseek.com')) {
+      throw new Error('Please navigate to a DeepSeek conversation page first.');
     }
-      
-          chrome.tabs.sendMessage(tab.id, {
+
+    chrome.tabs.sendMessage(tab.id, {
       action: 'exportConversation',
       conversationId,
-      orgId,
       format: document.getElementById('format').value,
       includeChats: document.getElementById('includeChats').checked,
       includeThinking: document.getElementById('includeThinking').checked,
       includeMetadata: document.getElementById('includeMetadata').checked,
-      includeArtifacts: document.getElementById('includeArtifacts').checked,
-      extractArtifacts: document.getElementById('extractArtifacts').checked,
-      artifactFormat: document.getElementById('artifactFormat').value,
-      flattenArtifacts: document.getElementById('flattenArtifacts').checked
     }, (response) => {
       if (chrome.runtime.lastError) {
         console.error('Chrome runtime error:', chrome.runtime.lastError);
@@ -113,7 +84,7 @@ document.getElementById('exportCurrent').addEventListener('click', async () => {
         button.disabled = false;
         return;
       }
-      
+
       if (response?.success) {
         showStatus('Conversation exported successfully!', 'success');
       } else {
@@ -123,42 +94,31 @@ document.getElementById('exportCurrent').addEventListener('click', async () => {
       }
       button.disabled = false;
     });
-    } catch (error) {
-      showStatus(error.message, 'error');
-      button.disabled = false;
-    }
-  });
-  
-  // Browse conversations
-  document.getElementById('browseConversations').addEventListener('click', () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('browse.html') });
-  });
+  } catch (error) {
+    showStatus(error.message, 'error');
+    button.disabled = false;
+  }
+});
 
-  // Export all conversations
-  document.getElementById('exportAll').addEventListener('click', async () => {
-    const button = document.getElementById('exportAll');
-    button.disabled = true;
-    showStatus('Fetching all conversations...', 'info');
-    
-    try {
-      const orgId = await getOrgId();
-      
-          if (!orgId) {
-      throw new Error('Organization ID not configured. Click the setup link above to configure it.');
-      }
-      
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      
-          chrome.tabs.sendMessage(tab.id, {
+// Browse conversations
+document.getElementById('browseConversations').addEventListener('click', () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL('browse.html') });
+});
+
+// Export all conversations
+document.getElementById('exportAll').addEventListener('click', async () => {
+  const button = document.getElementById('exportAll');
+  button.disabled = true;
+  showStatus('Fetching all conversations...', 'info');
+
+  try {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+    chrome.tabs.sendMessage(tab.id, {
       action: 'exportAllConversations',
-      orgId,
       format: document.getElementById('format').value,
       includeChats: document.getElementById('includeChats').checked,
       includeMetadata: document.getElementById('includeMetadata').checked,
-      includeArtifacts: document.getElementById('includeArtifacts').checked,
-      extractArtifacts: document.getElementById('extractArtifacts').checked,
-      artifactFormat: document.getElementById('artifactFormat').value,
-      flattenArtifacts: document.getElementById('flattenArtifacts').checked
     }, (response) => {
       if (chrome.runtime.lastError) {
         console.error('Chrome runtime error:', chrome.runtime.lastError);
@@ -166,7 +126,7 @@ document.getElementById('exportCurrent').addEventListener('click', async () => {
         button.disabled = false;
         return;
       }
-      
+
       if (response?.success) {
         if (response.warnings) {
           showStatus(response.warnings, 'info');
@@ -180,8 +140,8 @@ document.getElementById('exportCurrent').addEventListener('click', async () => {
       }
       button.disabled = false;
     });
-    } catch (error) {
-      showStatus(error.message, 'error');
-      button.disabled = false;
-    }
-  });
+  } catch (error) {
+    showStatus(error.message, 'error');
+    button.disabled = false;
+  }
+});
