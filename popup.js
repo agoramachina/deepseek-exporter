@@ -1,4 +1,4 @@
-// Get current conversation ID from URL
+// Get current chat ID from URL
 async function getCurrentConversationId() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const url = new URL(tab.url);
@@ -52,23 +52,23 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCheckboxStates(); // Initialize on load
 });
 
-// Export current conversation
+// Export current chat
 document.getElementById('exportCurrent').addEventListener('click', async () => {
   const button = document.getElementById('exportCurrent');
   button.disabled = true;
-  showStatus('Fetching conversation...', 'info');
+  showStatus('Fetching chat...', 'info');
 
   try {
     const conversationId = await getCurrentConversationId();
 
     if (!conversationId) {
-      throw new Error('Could not detect conversation ID. Make sure you are on a DeepSeek conversation page.');
+      throw new Error('Could not detect chat ID. Make sure you are on a DeepSeek chat page.');
     }
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
     if (!tab.url.includes('chat.deepseek.com')) {
-      throw new Error('Please navigate to a DeepSeek conversation page first.');
+      throw new Error('Please navigate to a DeepSeek chat page first.');
     }
 
     chrome.tabs.sendMessage(tab.id, {
@@ -87,7 +87,7 @@ document.getElementById('exportCurrent').addEventListener('click', async () => {
       }
 
       if (response?.success) {
-        showStatus('Conversation exported successfully!', 'success');
+        showStatus('Chat exported successfully!', 'success');
       } else {
         const errorMsg = response?.error || 'Export failed';
         console.error('Export failed:', errorMsg, response?.details);
@@ -101,16 +101,16 @@ document.getElementById('exportCurrent').addEventListener('click', async () => {
   }
 });
 
-// Browse conversations
-document.getElementById('browseConversations').addEventListener('click', () => {
+// Browse chats
+document.getElementById('browsechats').addEventListener('click', () => {
   chrome.tabs.create({ url: chrome.runtime.getURL('browse.html') });
 });
 
-// Export all conversations
+// Export all chats
 document.getElementById('exportAll').addEventListener('click', async () => {
   const button = document.getElementById('exportAll');
   button.disabled = true;
-  showStatus('Fetching all conversations...', 'info');
+  showStatus('Fetching all chats...', 'info');
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -133,7 +133,7 @@ document.getElementById('exportAll').addEventListener('click', async () => {
         if (response.warnings) {
           showStatus(response.warnings, 'info');
         } else {
-          showStatus(`Exported ${response.count} conversations!`, 'success');
+          showStatus(`Exported ${response.count} chats!`, 'success');
         }
       } else {
         const errorMsg = response?.error || 'Export failed';

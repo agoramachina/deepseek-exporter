@@ -30,7 +30,7 @@ function getCurrentBranch(data) {
 // Convert to markdown format
 function convertToMarkdown(data, includeMetadata, sessionId = null, includeThinking = true) {
   const session = data.chat_session;
-  let markdown = `# ${session.title || 'Untitled Conversation'}\n\n`;
+  let markdown = `# ${session.title || 'Untitled Chat'}\n\n`;
 
   if (includeMetadata) {
     markdown += `**Created:** ${new Date(session.inserted_at * 1000).toLocaleString()}\n`;
@@ -71,7 +71,7 @@ function convertToText(data, includeMetadata, includeThinking = true) {
   let text = '';
 
   if (includeMetadata) {
-    text += `${session.title || 'Untitled Conversation'}\n`;
+    text += `${session.title || 'Untitled Chat'}\n`;
     text += `Created: ${new Date(session.inserted_at * 1000).toLocaleString()}\n`;
     text += `Updated: ${new Date(session.updated_at * 1000).toLocaleString()}\n`;
     text += '---\n\n';

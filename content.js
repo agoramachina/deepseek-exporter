@@ -173,7 +173,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           sendResponse({
             success: true,
             count,
-            warnings: `Exported ${count}/${sessions.length} conversations. Some failed: ${errors.join('; ')}`
+            warnings: `Exported ${count}/${sessions.length} chats. Some failed: ${errors.join('; ')}`
           });
         } else {
           sendResponse({ success: true, count });
@@ -191,6 +191,18 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     fetchAllConversations()
       .then(sessions => {
         sendResponse({ success: true, conversations: sessions });
+      })
+      .catch(error => {
+        sendResponse({ success: false, error: error.message });
+      });
+
+    return true;
+  }
+
+  if (request.action === 'fetchConversationData') {
+    fetchConversation(request.sessionId)
+      .then(data => {
+        sendResponse({ success: true, data });
       })
       .catch(error => {
         sendResponse({ success: false, error: error.message });
