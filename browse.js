@@ -92,8 +92,9 @@ function sendMessageToDeepSeekTab(action, data = {}) {
 async function loadConversations() {
   try {
     await loadCreatedDatesCache();
-    const response = await sendMessageToDeepSeekTab('loadConversations');
-    allConversations = response.conversations;
+    await sendMessageToDeepSeekTab('loadConversations');
+    const result = await chrome.storage.local.get('deepseekSessionList');
+    allConversations = result.deepseekSessionList || [];
     applyFiltersAndSort();
     eagerLoadCreatedDates(allConversations); // runs in background, don't await
   } catch (error) {

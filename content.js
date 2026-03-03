@@ -190,7 +190,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'loadConversations') {
     fetchAllConversations()
       .then(sessions => {
-        sendResponse({ success: true, conversations: sessions });
+        chrome.storage.local.set({ deepseekSessionList: sessions }, () => {
+          sendResponse({ success: true, count: sessions.length });
+        });
       })
       .catch(error => {
         sendResponse({ success: false, error: error.message });
