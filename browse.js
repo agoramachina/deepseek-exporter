@@ -95,8 +95,24 @@ async function loadConversations() {
     const response = await sendMessageToDeepSeekTab('loadConversations');
     allConversations = response.conversations;
     applyFiltersAndSort();
+    eagerLoadCreatedDates(allConversations); // runs in background, don't await
   } catch (error) {
     showError(`Failed to load chats: ${error.message}`);
+  }
+}
+
+async function eagerLoadCreatedDates(sessions) {
+  const missing = sessions.filter(s => !createdDatesCache[s.id]);
+  if (missing.length === 0) return;
+
+  for (const session of missing) {
+    try {
+      const response = await sendMessageToDeepSeekTab('fetchConversationData', { sessionId: session.id });
+      saveCreatedDate(session.id, response.data?.chat_session?.inserted_at);
+    } catch (e) {
+      // silently skip failed fetches
+    }
+    await new Promise(resolve => setTimeout(resolve, 200));
   }
 }
 
