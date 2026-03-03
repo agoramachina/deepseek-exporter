@@ -138,6 +138,9 @@ function sortConversations() {
       if (field === 'title') {
         aVal = (a.title || '').toLowerCase();
         bVal = (b.title || '').toLowerCase();
+      } else if (field === 'created') {
+        aVal = createdDatesCache[a.id] || 0;
+        bVal = createdDatesCache[b.id] || 0;
       } else { // updated
         aVal = a.updated_at;
         bVal = b.updated_at;
@@ -193,7 +196,7 @@ function displayConversations() {
       <thead>
         <tr>
           <th class="sortable" data-sort="title">Title${getSortIndicator('title')}</th>
-          <th>Created</th>
+          <th class="sortable" data-sort="created">Created${getSortIndicator('created')}</th>
           <th class="sortable" data-sort="updated">Updated${getSortIndicator('updated')}</th>
           <th>Actions</th>
           <th class="checkbox-col">
