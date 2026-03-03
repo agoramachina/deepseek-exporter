@@ -93,19 +93,14 @@
     .header {
       background: var(--bg-card);
       border-bottom: 1px solid var(--border-color);
-      padding: 16px 20px;
+      padding: 10px 20px;
       position: sticky;
       top: 0;
       z-index: 100;
       box-shadow: 0 2px 4px var(--shadow-sm);
-    }
-
-    .header-top {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      margin-bottom: 12px;
+      gap: 16px;
     }
 
     .header-left {
@@ -115,10 +110,25 @@
       flex-shrink: 0;
     }
 
+    .header-center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 160px;
+    }
+
+    .header-right {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
     .header-left h1 {
       font-size: 18px;
       color: var(--primary-color);
-      margin: 0;
+      margin-right: 15px;
     }
 
     .theme-toggle {
@@ -134,18 +144,11 @@
     .theme-toggle:hover { color: var(--primary-color); background: var(--secondary-bg); }
     .theme-toggle svg { width: 20px; height: 20px; }
 
-    .stats { font-size: 13px; color: var(--text-secondary); flex-shrink: 0; }
-
-    .controls {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+    .stats { font-size: 13px; color: var(--text-secondary); }
 
     .search-box {
-      flex-grow: 1;
-      max-width: 400px;
+      flex: 1;
+      max-width: 300px;
       position: relative;
     }
     .search-box input {
@@ -176,10 +179,6 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 6px 12px;
-      background: var(--secondary-bg);
-      border-radius: 5px;
-      flex-wrap: wrap;
     }
     .export-settings label {
       display: flex;
@@ -317,30 +316,27 @@
 </head>
 <body>
   <div class="header">
-    <div class="header-top">
-      <div class="header-left">
-        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-          <svg class="sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="5" stroke-width="2"/>
-            <line x1="12" y1="1" x2="12" y2="3" stroke-width="2"/>
-            <line x1="12" y1="21" x2="12" y2="23" stroke-width="2"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke-width="2"/>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke-width="2"/>
-            <line x1="1" y1="12" x2="3" y2="12" stroke-width="2"/>
-            <line x1="21" y1="12" x2="23" y2="12" stroke-width="2"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke-width="2"/>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke-width="2"/>
-          </svg>
-          <svg class="moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none;">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2"/>
-          </svg>
-        </button>
-        <h1>Browse DeepSeek Chats <span id="header-version" style="font-size:13px; font-weight:400; color:var(--text-muted);"></span></h1>
-      </div>
-      <div class="stats" id="stats">Loading...</div>
+    <div class="header-left">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg class="sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="5" stroke-width="2"/>
+          <line x1="12" y1="1" x2="12" y2="3" stroke-width="2"/>
+          <line x1="12" y1="21" x2="12" y2="23" stroke-width="2"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke-width="2"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke-width="2"/>
+          <line x1="1" y1="12" x2="3" y2="12" stroke-width="2"/>
+          <line x1="21" y1="12" x2="23" y2="12" stroke-width="2"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke-width="2"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke-width="2"/>
+        </svg>
+        <svg class="moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2"/>
+        </svg>
+      </button>
+      <h1>Browse DeepSeek Chats <span id="header-version" style="font-size:13px; font-weight:400; color:var(--text-muted); margin-left:10px;"></span></h1>
     </div>
 
-    <div class="controls">
+    <div class="header-center">
       <div class="search-box" id="searchBox">
         <input type="text" id="searchInput" placeholder="Search chats...">
         <button class="clear-btn" id="clearSearch">✕</button>
@@ -365,8 +361,11 @@
           <input type="checkbox" id="includeMetadata"> Metadata
         </label>
       </div>
+    </div>
 
+    <div class="header-right">
       <button class="export-all-btn" id="exportAllBtn" disabled>Export All</button>
+      <div class="stats" id="stats">Loading...</div>
     </div>
   </div>
 
