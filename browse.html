@@ -83,46 +83,48 @@
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html, body { height: 100%; }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg-body);
       color: var(--text-primary);
       line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     .header {
       background: var(--bg-card);
       border-bottom: 1px solid var(--border-color);
       padding: 10px 20px;
-      position: sticky;
-      top: 0;
+      flex-shrink: 0;
       z-index: 100;
       box-shadow: 0 2px 4px var(--shadow-sm);
       display: flex;
       align-items: center;
-      gap: 16px;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+    }
+
+    .scroll-wrapper {
+      flex: 1;
+      overflow: auto;
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: clamp(10px, 1.5vw, 24px);
       flex-shrink: 0;
-    }
-
-    .header-center {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 160px;
     }
 
     .header-right {
-      flex-shrink: 0;
       display: flex;
       align-items: center;
-      gap: 30px;
+      gap: clamp(10px, 2.5vw, 50px);
+      flex-shrink: 0;
     }
 
     .header-left h1 {
@@ -147,8 +149,9 @@
     .stats { font-size: 13px; color: var(--text-secondary); }
 
     .search-box {
-      flex: 1;
-      max-width: 300px;
+      margin-right:20px;
+      width: clamp(100px, 28vw, 600px);
+      min-width: 0;
       position: relative;
     }
     .search-box input {
@@ -334,24 +337,23 @@
         </svg>
       </button>
       <h1>Browse DeepSeek Chats <span id="header-version" style="font-size:13px; font-weight:400; color:var(--text-muted); margin-left:10px;"></span></h1>
-    </div>
-
-    <div class="header-center">
       <div class="search-box" id="searchBox">
         <input type="text" id="searchInput" placeholder="Search chats...">
         <button class="clear-btn" id="clearSearch">✕</button>
       </div>
+    </div>
 
+    <div class="header-right">
       <div class="export-settings">
-        <label>
-          Format:
-          <select id="exportFormat">
+        <label> 
+          Format:</label>
+          <select id="exportFormat" style="width:110px; margin-left:2px; margin-right:2px;">
             <option value="text">Plain Text</option>
             <option value="markdown">Markdown</option>
             <option value="json">JSON</option>
           </select>
         </label>
-        <label title="Include chat messages">
+        <label title="Include chat messages" style="width:50px">
           <input type="checkbox" id="includeChats" checked> Chat
         </label>
         <label title="Include thinking blocks">
@@ -361,20 +363,19 @@
           <input type="checkbox" id="includeMetadata"> Metadata
         </label>
       </div>
-    </div>
-
-    <div class="header-right">
       <button class="export-all-btn" id="exportAllBtn" disabled>Export All</button>
       <div class="stats" id="stats">Loading...</div>
     </div>
   </div>
 
-  <div class="container">
-    <div class="conversations-table">
-      <div id="tableContent">
-        <div class="loading">
-          <div class="spinner"></div>
-          <div>Loading chats...</div>
+  <div class="scroll-wrapper">
+    <div class="container">
+      <div class="conversations-table">
+        <div id="tableContent">
+          <div class="loading">
+            <div class="spinner"></div>
+            <div>Loading chats...</div>
+          </div>
         </div>
       </div>
     </div>
