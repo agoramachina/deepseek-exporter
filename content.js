@@ -56,13 +56,23 @@ async function fetchConversation(sessionId) {
   return apiFetch(`https://chat.deepseek.com/api/v0/chat/history_messages?chat_session_id=${sessionId}&cache_version=0`);
 }
 
-// Fetch conversation list (single page for now — pagination TBD)
+// Fetch all conversations, paginating via lte_cursor if needed
 async function fetchAllConversations() {
-  const bizData = await apiFetch('https://chat.deepseek.com/api/v0/chat_session/fetch_page');
-  if (bizData.has_more) {
-    console.warn('DeepSeek Exporter: there are more conversations beyond the first page — pagination not yet implemented.');
+  const sessions = [];
+  let url = 'https://chat.deepseek.com/api/v0/chat_session/fetch_page?lte_cursor.pinned=false';
+
+  while (true) {
+    const bizData = await apiFetch(url);
+    sessions.push(...bizData.chat_sessions);
+
+    if (!bizData.has_more) break;
+
+    const last = bizData.chat_sessions[bizData.chat_sessions.length - 1];
+    url = `https://chat.deepseek.com/api/v0/chat_session/fetch_page?lte_cursor.pinned=false&lte_cursor.updated_at=${last.updated_at}&lte_cursor.id=${last.id}`;
   }
-  return bizData.chat_sessions;
+
+  console.log(`DeepSeek Exporter: fetched ${sessions.length} conversations total`);
+  return sessions;
 }
 
 // Handle messages from popup
@@ -116,18 +126,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       .then(async sessions => {
         console.log(`Fetched ${sessions.length} conversations`);
 
-        if (request.format === 'json') {
-          // For JSON, export the session list as-is (summary only — no full message fetch)
-          const datetime = getLocalDateTimeString();
-          downloadFile(JSON.stringify(sessions, null, 2), `deepseek-exports-${datetime}.json`);
-          sendResponse({ success: true, count: sessions.length });
-          return;
-        }
-
-        // For markdown/text, fetch each full conversation and package as a ZIP
+        // Fetch each full conversation and package as a ZIP
         const zip = new JSZip();
         let count = 0;
         const errors = [];
+        const includeThinking = request.includeThinking !== false;
+        const ext = request.format === 'markdown' ? 'md' : request.format === 'json' ? 'json' : 'txt';
 
         for (const session of sessions) {
           try {
@@ -137,12 +141,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
             let content;
             if (request.format === 'markdown') {
-              content = convertToMarkdown(data, request.includeMetadata, session.id, true);
-              zip.file(`${filename}.md`, content);
+              content = convertToMarkdown(data, request.includeMetadata, session.id, includeThinking);
+            } else if (request.format === 'json') {
+              content = JSON.stringify(data, null, 2);
             } else {
-              content = convertToText(data, request.includeMetadata, true);
-              zip.file(`${filename}.txt`, content);
+              content = convertToText(data, request.includeMetadata, includeThinking);
             }
+            zip.file(`${filename}.${ext}`, content);
 
             count++;
             await new Promise(resolve => setTimeout(resolve, 500));

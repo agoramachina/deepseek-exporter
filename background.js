@@ -9,7 +9,7 @@ chrome.runtime.onInstalled.addListener(() => {
     tabs.forEach(tab => {
       chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        files: ['utils.js', 'content.js']
+        files: ['jszip.min.js', 'utils.js', 'content.js']
       }).catch(err => console.log('Could not inject into tab', tab.id, err));
     });
   });
@@ -22,7 +22,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (tabs[0]) {
         chrome.scripting.executeScript({
           target: { tabId: tabs[0].id },
-          files: ['utils.js', 'content.js']
+          files: ['jszip.min.js', 'utils.js', 'content.js']
         }, () => {
           sendResponse({ success: true });
         });

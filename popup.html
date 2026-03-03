@@ -42,7 +42,7 @@
     }
 
     body {
-      width: 350px;
+      width: 250px;
       padding: 8px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       margin: 0;
@@ -77,11 +77,11 @@
       cursor: not-allowed;
       color: #999;
     }
-    #browseConversations {
+    #browsechats {
       background: var(--secondary-color);
       margin-top: 6px;
     }
-    #browseConversations:hover {
+    #browsechats:hover {
       background: var(--secondary-hover);
     }
     .status {
@@ -159,32 +159,32 @@
       <label>
         Chat format:
         <select id="format">
-          <option value="json">JSON</option>
-          <option value="markdown">Markdown</option>
           <option value="text">Plain Text</option>
+          <option value="markdown">Markdown</option>
+          <option value="json">JSON</option>
         </select>
       </label>
 
-      <label title="Include the conversation messages in the exported file">
+      <label title="Include the chat messages in the exported file">
         <input type="checkbox" id="includeChats" checked>
         Chat
       </label>
 
-      <label title="Include thinking blocks in the exported conversation">
+      <label title="Include thinking blocks in the exported chat">
         <input type="checkbox" id="includeThinking">
         Thinking
       </label>
 
-      <label title="Add conversation metadata (name, date, model, etc.) at the top of exported files">
+      <label title="Add chat metadata (name, date, model, etc.) at the top of exported files">
         <input type="checkbox" id="includeMetadata">
         Metadata
       </label>
     </div>
 
-  <button id="exportCurrent">Export Current Conversation</button>
-  <button id="exportAll">Export All Conversations</button>
+  <button id="exportCurrent">Export Current chat</button>
+  <button id="exportAll">Export All chats</button>
 
-  <button id="browseConversations">Browse All Conversations</button>
+  <button id="browsechats">Browse All chats</button>
   
   <div id="status"></div>
   </div>

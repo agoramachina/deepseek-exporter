@@ -32,17 +32,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const isJson = formatSelect.value === 'json';
     const chatsEnabled = !isJson && includeChatsCheckbox.checked;
 
-    // Disable all content options when JSON is selected
+    // Lock all checkboxes checked when JSON is selected
     includeChatsCheckbox.disabled = isJson;
     includeThinkingCheckbox.disabled = isJson || !chatsEnabled;
     includeMetadataCheckbox.disabled = isJson || !chatsEnabled;
 
-    if (isJson || !chatsEnabled) {
+    if (isJson) {
+      includeChatsCheckbox.checked = true;
+      includeThinkingCheckbox.checked = true;
+      includeMetadataCheckbox.checked = true;
+    } else if (!chatsEnabled) {
       includeThinkingCheckbox.checked = false;
       includeMetadataCheckbox.checked = false;
-    }
-    if (isJson) {
-      includeChatsCheckbox.checked = false;
     }
   }
 
@@ -118,6 +119,7 @@ document.getElementById('exportAll').addEventListener('click', async () => {
       action: 'exportAllConversations',
       format: document.getElementById('format').value,
       includeChats: document.getElementById('includeChats').checked,
+      includeThinking: document.getElementById('includeThinking').checked,
       includeMetadata: document.getElementById('includeMetadata').checked,
     }, (response) => {
       if (chrome.runtime.lastError) {
