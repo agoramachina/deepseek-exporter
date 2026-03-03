@@ -92,7 +92,20 @@ function sendMessageToDeepSeekTab(action, data = {}) {
 async function loadConversations() {
   try {
     await loadCreatedDatesCache();
+
+    // Poll progress while content script paginates
+    const progressInterval = setInterval(async () => {
+      const r = await chrome.storage.local.get('deepseekLoadProgress');
+      if (r.deepseekLoadProgress) {
+        document.querySelector('#tableContent .loading div:last-child').textContent =
+          `Loading chats... (${r.deepseekLoadProgress.toLocaleString()} chats found so far)`;
+      }
+    }, 800);
+
     await sendMessageToDeepSeekTab('loadConversations');
+    clearInterval(progressInterval);
+    await chrome.storage.local.remove('deepseekLoadProgress');
+
     const result = await chrome.storage.local.get('deepseekSessionList');
     allConversations = result.deepseekSessionList || [];
     applyFiltersAndSort();

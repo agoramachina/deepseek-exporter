@@ -28,27 +28,35 @@ function getAuthToken() {
 }
 
 // Authenticated fetch — unwraps response.data.biz_data or throws
-async function apiFetch(url) {
+async function apiFetch(url, timeoutMs = 30000) {
   const token = getAuthToken();
   if (!token) throw new Error('Not logged in to DeepSeek. Please log in and try again.');
 
-  const response = await fetch(url, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Accept': 'application/json',
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json',
+      },
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`);
     }
-  });
 
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    const json = await response.json();
+    if (json.code !== 0 || json.data?.biz_code !== 0) {
+      throw new Error(`API error: ${json.msg || json.data?.biz_msg || 'Unknown error'}`);
+    }
+
+    return json.data.biz_data;
+  } finally {
+    clearTimeout(timer);
   }
-
-  const json = await response.json();
-  if (json.code !== 0 || json.data?.biz_code !== 0) {
-    throw new Error(`API error: ${json.msg || json.data?.biz_msg || 'Unknown error'}`);
-  }
-
-  return json.data.biz_data;
 }
 
 // Fetch full message history for a single conversation
@@ -59,16 +67,31 @@ async function fetchConversation(sessionId) {
 // Fetch all conversations, paginating via lte_cursor if needed
 async function fetchAllConversations() {
   const sessions = [];
+  const seenIds = new Set();
   let url = 'https://chat.deepseek.com/api/v0/chat_session/fetch_page?lte_cursor.pinned=false';
+  let page = 0;
+  const MAX_PAGES = 500;
 
-  while (true) {
+  while (page < MAX_PAGES) {
     const bizData = await apiFetch(url);
-    sessions.push(...bizData.chat_sessions);
+    const pageItems = bizData.chat_sessions || [];
 
-    if (!bizData.has_more) break;
+    let newCount = 0;
+    for (const item of pageItems) {
+      if (!seenIds.has(item.id)) {
+        seenIds.add(item.id);
+        sessions.push(item);
+        newCount++;
+      }
+    }
 
-    const last = bizData.chat_sessions[bizData.chat_sessions.length - 1];
-    url = `https://chat.deepseek.com/api/v0/chat_session/fetch_page?lte_cursor.pinned=false&lte_cursor.updated_at=${last.updated_at}&lte_cursor.id=${last.id}`;
+    chrome.storage.local.set({ deepseekLoadProgress: sessions.length });
+
+    if (!bizData.has_more || pageItems.length === 0 || newCount === 0) break;
+
+    const last = pageItems[pageItems.length - 1];
+    url = `https://chat.deepseek.com/api/v0/chat_session/fetch_page?lte_cursor.pinned=false&lte_cursor.updated_at=${last.updated_at}`;
+    page++;
   }
 
   console.log(`DeepSeek Exporter: fetched ${sessions.length} conversations total`);
