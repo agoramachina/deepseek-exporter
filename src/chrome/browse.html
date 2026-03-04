@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Browse DeepSeek Chats</title>
+  <style>
+    :root {
+      --bg-body: #f5f5f5;
+      --bg-card: #ffffff;
+      --text-primary: #333333;
+      --text-secondary: #666666;
+      --text-muted: #999999;
+      --border-color: #e0e0e0;
+      --border-light: #f0f0f0;
+      --primary-color: #5436DA;
+      --primary-hover: #4329B8;
+      --secondary-bg: #f8f9fa;
+      --hover-bg: #f8f9fa;
+      --input-border: #dddddd;
+      --input-focus: #5436DA;
+      --shadow-sm: rgba(0,0,0,0.05);
+      --shadow-md: rgba(0,0,0,0.15);
+      --error-color: #d32f2f;
+      --disabled-bg: #cccccc;
+      --disabled-text: #999999;
+      --toast-bg: #333333;
+      --modal-overlay: rgba(0,0,0,0.5);
+      --progress-bg: #e0e0e0;
+      --cancel-btn: #dc3545;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg-body: #121212;
+        --bg-card: #1e1e1e;
+        --text-primary: #e0e0e0;
+        --text-secondary: #b0b0b0;
+        --text-muted: #808080;
+        --border-color: #2a2a2a;
+        --border-light: #333333;
+        --primary-color: #6b52e8;
+        --primary-hover: #7d66f0;
+        --secondary-bg: #2a2a2a;
+        --hover-bg: #2a2a2a;
+        --input-border: #3a3a3a;
+        --input-focus: #8b7aff;
+        --shadow-sm: rgba(0,0,0,0.3);
+        --shadow-md: rgba(0,0,0,0.5);
+        --error-color: #ff6b6b;
+        --disabled-bg: #3a3a3a;
+        --disabled-text: #666666;
+        --toast-bg: #2a2a2a;
+        --modal-overlay: rgba(0,0,0,0.7);
+        --progress-bg: #3a3a3a;
+        --cancel-btn: #e74c3c;
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg-body: #121212;
+      --bg-card: #1e1e1e;
+      --text-primary: #e0e0e0;
+      --text-secondary: #b0b0b0;
+      --text-muted: #808080;
+      --border-color: #2a2a2a;
+      --border-light: #333333;
+      --primary-color: #6b52e8;
+      --primary-hover: #7d66f0;
+      --secondary-bg: #2a2a2a;
+      --hover-bg: #2a2a2a;
+      --input-border: #3a3a3a;
+      --input-focus: #8b7aff;
+      --shadow-sm: rgba(0,0,0,0.3);
+      --shadow-md: rgba(0,0,0,0.5);
+      --error-color: #ff6b6b;
+      --disabled-bg: #3a3a3a;
+      --disabled-text: #666666;
+      --toast-bg: #2a2a2a;
+      --modal-overlay: rgba(0,0,0,0.7);
+      --progress-bg: #3a3a3a;
+      --cancel-btn: #e74c3c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-body);
+      color: var(--text-primary);
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      padding: 10px 20px;
+      flex-shrink: 0;
+      z-index: 100;
+      box-shadow: 0 2px 4px var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: no-wrap;
+    }
+
+    .scroll-wrapper {
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: auto;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: clamp(10px, 1.5vw, 24px);
+      flex-shrink: 0;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: clamp(10px, 2.5vw, 50px);
+      flex-shrink: 0;
+    }
+
+    .header-left h1 {
+      font-size: 18px;
+      color: var(--primary-color);
+      margin-right: 15px;
+    }
+
+    .theme-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      color: var(--text-secondary);
+      border-radius: 50%;
+    }
+    .theme-toggle:hover { color: var(--primary-color); background: var(--secondary-bg); }
+    .theme-toggle svg { width: 20px; height: 20px; }
+
+    .stats { font-size: 13px; color: var(--text-secondary); }
+
+    .search-box {
+      margin-right:20px;
+      width: clamp(50px, 28vw, 600px);
+      min-width: 0;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      padding: 8px 36px 8px 14px;
+      border: 1px solid var(--input-border);
+      border-radius: 5px;
+      font-size: 13px;
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+    .search-box input:focus { outline: none; border-color: var(--input-focus); }
+    .search-box .clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      display: none;
+    }
+    .search-box.has-text .clear-btn { display: block; }
+
+    .export-settings {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .export-settings label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .export-settings label input[type="checkbox"] { cursor: pointer; }
+    .export-settings select {
+      padding: 3px 8px;
+      border: 1px solid var(--input-border);
+      border-radius: 3px;
+      font-size: 13px;
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    .export-all-btn {
+      padding: 8px 18px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .export-all-btn:hover { background: var(--primary-hover); }
+    .export-all-btn:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; }
+
+    .container { min-width: 750px; max-width: 1400px; margin: 20px auto; padding: 0 20px; }
+
+    .conversations-table {
+      background: var(--bg-card);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px var(--shadow-sm);
+    }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--secondary-bg); border-bottom: 2px solid var(--border-color); }
+    th {
+      padding: 12px 15px;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    th.sortable { cursor: pointer; user-select: none; min-width:110px;}
+    th.sortable:hover { background: var(--hover-bg); }
+    .sort-indicator { margin-left: 4px; color: var(--primary-color); font-size: 13px; font-weight: normal; }
+
+    tbody tr { border-bottom: 1px solid var(--border-light); transition: background 0.1s; }
+    tbody tr:hover { background: var(--hover-bg); }
+    td { padding: 12px 15px; font-size: 14px; }
+
+    .conv-title {
+      font-weight: 500;
+      max-width: 600px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .conv-title a { color: inherit; text-decoration: none; }
+    .conv-title a:hover { color: var(--primary-color); text-decoration: underline; }
+
+    .pin-icon { font-size: 12px; margin-right: 5px; opacity: 0.7; }
+
+    .date { color: var(--text-secondary); white-space: nowrap; font-size: 13px; }
+
+    .actions { display: flex; gap: 6px; }
+
+    .btn-small {
+      padding: 5px 10px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .btn-export { background: var(--primary-color); color: white; }
+    .btn-export:hover { background: var(--primary-hover); }
+    .btn-view { background: var(--secondary-bg); color: var(--text-primary); }
+    .btn-view:hover { filter: brightness(0.95); }
+    .btn-small:disabled { background: var(--disabled-bg); color: var(--disabled-text); cursor: not-allowed; }
+
+    .checkbox-col { width: 44px; text-align: center; padding: 12px 8px !important; }
+    .checkbox-col input[type="checkbox"] { cursor: pointer; width: 16px; height: 16px; margin: 0; }
+
+    .loading, .error-msg, .no-results {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+    .error-msg { color: var(--error-color); }
+
+    .spinner {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      border: 3px solid var(--border-light);
+      border-top: 3px solid var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 10px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--toast-bg);
+      color: white;
+      padding: 10px 22px;
+      border-radius: 20px;
+      font-size: 14px;
+      z-index: 2000;
+      display: none;
+      box-shadow: 0 4px 12px var(--shadow-md);
+    }
+    .toast.show { display: block; animation: slideUp 0.3s ease; }
+    @keyframes slideUp {
+      from { transform: translateX(-50%) translateY(60px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+
+    @media (max-width: 1000px) {
+      #header-version { display: none; }
+    }
+    @media (max-width: 1350px) {
+      .header-left h1 { display: none; }
+    }
+    @media (max-width: 1000px) {
+      .theme-toggle { display: none; }
+    }
+    @media (max-width: 800px) {
+      .search-box { display: none; }
+    }
+    @media (max-width: 1350px) {
+      .stats { display: none; }
+    }
+    
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <svg class="sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="5" stroke-width="2"/>
+          <line x1="12" y1="1" x2="12" y2="3" stroke-width="2"/>
+          <line x1="12" y1="21" x2="12" y2="23" stroke-width="2"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke-width="2"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke-width="2"/>
+          <line x1="1" y1="12" x2="3" y2="12" stroke-width="2"/>
+          <line x1="21" y1="12" x2="23" y2="12" stroke-width="2"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke-width="2"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke-width="2"/>
+        </svg>
+        <svg class="moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display:none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke-width="2"/>
+        </svg>
+      </button>
+      <h1>Browse DeepSeek Chats <span id="header-version" style="font-size:13px; font-weight:400; color:var(--text-muted); margin-left:10px;"></span></h1>
+      <div class="search-box" id="searchBox">
+        <input type="text" id="searchInput" placeholder="Search chats...">
+        <button class="clear-btn" id="clearSearch">✕</button>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="export-settings">
+        <label> 
+          Format:</label>
+          <select id="exportFormat" style="width:110px; margin-left:2px; margin-right:2px;">
+            <option value="text">Plain Text</option>
+            <option value="markdown">Markdown</option>
+            <option value="json">JSON</option>
+          </select>
+        </label>
+        <label title="Include chat messages" style="width:50px">
+          <input type="checkbox" id="includeChats" checked> Chat
+        </label>
+        <label title="Include thinking blocks">
+          <input type="checkbox" id="includeThinking"> Thinking
+        </label>
+        <label title="Include metadata header">
+          <input type="checkbox" id="includeMetadata"> Metadata
+        </label>
+      </div>
+      <button class="export-all-btn" id="exportAllBtn" disabled>Export All</button>
+      <div class="stats" id="stats">Loading...</div>
+    </div>
+  </div>
+
+  <div class="scroll-wrapper">
+    <div class="container">
+      <div class="conversations-table">
+        <div id="tableContent">
+          <div class="loading">
+            <div class="spinner"></div>
+            <div>Loading chats...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Progress modal -->
+  <div id="progressModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:var(--modal-overlay); z-index:3000;">
+    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--bg-card); padding:28px; border-radius:8px; min-width:380px; color:var(--text-primary);">
+      <h3 style="margin-top:0;">Exporting Chats</h3>
+      <div style="margin:16px 0;">
+        <div id="progressText">Preparing export...</div>
+        <div style="background:var(--progress-bg); height:16px; border-radius:8px; margin-top:10px; overflow:hidden;">
+          <div id="progressBar" style="background:var(--primary-color); height:100%; width:0%; transition:width 0.3s;"></div>
+        </div>
+        <div id="progressStats" style="margin-top:8px; font-size:13px; color:var(--text-secondary);"></div>
+      </div>
+      <button id="cancelExport" style="padding:7px 14px; background:var(--cancel-btn); color:white; border:none; border-radius:4px; cursor:pointer;">Cancel</button>
+    </div>
+  </div>
+
+  <script src="jszip.min.js"></script>
+  <script src="utils.js"></script>
+  <script src="browse.js"></script>
+</body>
+</html>
