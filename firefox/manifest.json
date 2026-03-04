@@ -1,0 +1,45 @@
+{
+    "manifest_version": 3,
+    "name": "DeepSeek Exporter",
+    "version": "1.4.0",
+    "description": "Export conversations from DeepSeek AI",
+    "browser_specific_settings": {
+      "gecko": {
+        "id": "deepseek-exporter@agoramachina",
+        "strict_min_version": "109.0"
+      }
+    },
+    "permissions": [
+      "activeTab",
+      "storage",
+      "scripting",
+      "tabs"
+    ],
+    "host_permissions": [
+      "https://chat.deepseek.com/*"
+    ],
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": {
+        "16": "icon16.png",
+        "48": "icon48.png",
+        "128": "icon128.png"
+      }
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://chat.deepseek.com/*"],
+        "js": ["jszip.min.js", "utils.js", "content.js"],
+        "css": ["content.css"]
+      }
+    ],
+    "background": {
+      "scripts": ["background.js"]
+    },
+    "icons": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
+    "web_accessible_resources": []
+}

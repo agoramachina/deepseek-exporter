@@ -9,7 +9,7 @@ A browser extension for Chrome and Firefox that allows you to export your DeepSe
 - 🔍 **Browse & Search** - View all your chats in a searchable table
 - 🔀 **Sort chats** - Sort by name, creation date, and recently updated
 - 🌳 **Branch-Aware Export** - Correctly handles chat branches
-- 📝 **Multiple Formats** - JSON (full data), Markdown, or Plain Text (PDF coming soon!)
+- 📝 **Multiple Formats** - JSON (full data), Markdown, or Plain Text
 - 🗂️ **ZIP Archives** - Bulk exports create organized ZIP files with all of your chats
 - 🏷️ **Metadata Options** - Include or exclude timestamps, ids, and other metadata
 - ⚓ **Stable** - Fetches chats through API rather than DOM
@@ -96,6 +96,14 @@ Available as a [Firefox extension] —**Coming Soon!**
 - Plaintext and markdown formats only export the currently selected branch in chats with multiple branches
 - Large bulk exports may take several minutes
 - Rate limiting: The extension processes chats in small batches to avoid overwhelming the API
+
+---
+### Todo
+
+- Export as pdf
+- Sync to Google Drive or local filesystem
+- Include time with date
+- Flag new or updated chats since last export
 
 ---
 ### Privacy & Security
