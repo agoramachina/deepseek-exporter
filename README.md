@@ -45,7 +45,7 @@ Available as a [Firefox extension] —**Coming Soon!**
 ### Usage
 
 #### Export Current Chat
-1. Navigate to any chat on DeepSeek's webUI
+1. Navigate to any chat on [DeepSeek's webUI](https://chat.deepseek.com/)
 2. Click the extension icon
 3. Choose your export format and metadata preferences
 4. Click "Export Current Chat"
