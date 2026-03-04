@@ -13,7 +13,7 @@ A browser extension for Chrome and Firefox that allows you to export your DeepSe
 - 🗂️ **ZIP Archives** - Bulk exports create organized ZIP files with all of your chats
 - 🏷️ **Metadata Options** - Include or exclude timestamps, ids, and other metadata
 - ⚓ **Stable** - Fetches chats through API rather than DOM
-- 🔒 **Secure** - All data processing happens in your browser and is never sent anywhere
+- 🔒 **Secure** - All data processing is local and never shared
 - ☀️ **Light/Dark Mode** - Toggle between color schemes
 
 ---
