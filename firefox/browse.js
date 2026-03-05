@@ -63,28 +63,35 @@ function toggleTheme() {
 
 // ---- Messaging ----
 
-function sendMessageToDeepSeekTab(action, data = {}) {
-  return new Promise((resolve, reject) => {
-    chrome.tabs.query({ url: 'https://chat.deepseek.com/*' }, (tabs) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
-      if (!tabs || tabs.length === 0) {
-        reject(new Error('Please open a DeepSeek tab first, then reload this page.'));
-        return;
-      }
-      chrome.tabs.sendMessage(tabs[0].id, { action, ...data }, (response) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-        } else if (response && response.success) {
-          resolve(response);
-        } else {
-          reject(new Error(response?.error || 'Request failed'));
-        }
+async function sendMessageToDeepSeekTab(action, data = {}) {
+  const tabs = await chrome.tabs.query({ url: 'https://chat.deepseek.com/*' });
+  if (!tabs || tabs.length === 0) {
+    throw new Error('Please open a DeepSeek tab first, then reload this page.');
+  }
+
+  // Try each DeepSeek tab until one with a live content script responds
+  for (const tab of tabs) {
+    try {
+      return await new Promise((resolve, reject) => {
+        chrome.tabs.sendMessage(tab.id, { action, ...data }, (response) => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else if (response && response.success) {
+            resolve(response);
+          } else {
+            reject(new Error(response?.error || 'Request failed'));
+          }
+        });
       });
-    });
-  });
+    } catch (e) {
+      if (e.message.includes('Could not establish connection') || e.message.includes('Receiving end does not exist')) {
+        continue; // Content script not loaded in this tab, try next
+      }
+      throw e;
+    }
+  }
+
+  throw new Error('Could not connect to DeepSeek. Please refresh your DeepSeek tab and try again.');
 }
 
 // ---- Load conversations ----
