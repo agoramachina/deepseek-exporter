@@ -21,25 +21,27 @@ A browser extension for Chrome and Firefox that allows you to export your DeepSe
 The simplest way to install DeepSeek Exporter and receive automatic updates is through your browser's official Extensions page.
 
 #### Chrome and Chromium-based browsers
-Available on the [Chrome Web Store] —**Coming Soon!**
+Not yet available. Refer to the manual installation
 
 #### Firefox
-Available as a [Firefox extension] —**Coming Soon!**
+Available on the [Firefox Add-ons store](https://addons.mozilla.org/en-US/firefox/addon/deepseek-exporter/)
 
 ---
 ### Manual Installation
 
 #### Chrome and Chromium-based browsers
-1. Download the `deepseek-exporter-chrome-vX.X.X.zip` from the [Releases page](https://github.com/agoramachina/deepseek-exporter/releases)
-2. Extract the zip into a safe folder (this will be the permanent location - don't move or delete it)
+1. Clone or download the repository
+2. Copy the `google/` folder to a safe permanent location (you can rename it to `deepseek-exporter` or anything else if you like)
 3. Open Chrome and navigate to `chrome://extensions/`
 4. Enable **Developer mode** (toggle in top right)
-5. Click **Load unpacked** and select the extracted `deepseek-exporter-chrome` folder
+5. Click **Load unpacked** and select the `google` folder (or whatever you renamed it to)
 
 #### Firefox
-1. Download the latest `.xpi` file from the [Releases page](https://github.com/agoramachina/deepseek-exporter/releases)
-2. Drag and drop the `.xpi` file into Firefox
-3. Click **Add** when Firefox asks for permission
+1. Clone or download the repository
+2. Zip the contents of the `firefox/` folder
+3. Rename the zip extension from `.zip` to `.xpi`
+4. Drag and drop the `.xpi` file into Firefox
+5. Click **Add** when Firefox asks for permission
 
 ---
 ### Usage
@@ -85,11 +87,6 @@ Available as a [Firefox extension] —**Coming Soon!**
 - Shows only the current chat branch
 - Ideal for copying into other LLMs or text editors
 
-#### PDF
-- Easy to read format
-- Ideal for printing
-- Coming Soon!
-
 ---
 ### Known Limitations
 
@@ -98,9 +95,9 @@ Available as a [Firefox extension] —**Coming Soon!**
 - Rate limiting: The extension processes chats in small batches to avoid overwhelming the API
 
 ---
-### Todo
+### Roadmap
 
-- Export as pdf
+- Export as .pdf
 - Sync to Google Drive or local filesystem
 - Include time with date
 - Flag new or updated chats since last export
