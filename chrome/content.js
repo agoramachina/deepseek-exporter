@@ -64,37 +64,72 @@ async function fetchConversation(sessionId) {
   return apiFetch(`https://chat.deepseek.com/api/v0/chat/history_messages?chat_session_id=${sessionId}&cache_version=0`);
 }
 
-// Fetch all conversations, paginating via lte_cursor if needed
-async function fetchAllConversations() {
+// Scrape conversation list from the sidebar DOM
+function scrapeConversationsFromDOM() {
   const sessions = [];
   const seenIds = new Set();
-  let url = 'https://chat.deepseek.com/api/v0/chat_session/fetch_page?lte_cursor.pinned=false';
-  let page = 0;
-  const MAX_PAGES = 500;
 
-  while (page < MAX_PAGES) {
-    const bizData = await apiFetch(url);
-    const pageItems = bizData.chat_sessions || [];
+  // Find all links to conversations in the sidebar
+  const links = document.querySelectorAll('a[href*="/a/chat/s/"]');
+  console.log(`DeepSeek Exporter: found ${links.length} conversation links in DOM`);
 
-    let newCount = 0;
-    for (const item of pageItems) {
-      if (!seenIds.has(item.id)) {
-        seenIds.add(item.id);
-        sessions.push(item);
-        newCount++;
+  for (const link of links) {
+    const href = link.getAttribute('href') || '';
+    const match = href.match(/\/a\/chat\/s\/([a-f0-9-]+)/);
+    if (!match) continue;
+
+    const id = match[1];
+    if (seenIds.has(id) || id === 'new') continue; // skip "new chat" links
+    seenIds.add(id);
+
+    // Get the title — look for text in the link or nearby elements
+    let title = '';
+    // Try to find a title span/div within the link
+    const titleEl = link.querySelector('[class*="title"], [class*="name"], [class*="text"]');
+    if (titleEl) {
+      title = titleEl.textContent.trim();
+    }
+    if (!title) {
+      // Use the link's own text, stripping any icon text
+      title = (link.textContent || '').replace(/📌|📌|⭐/g, '').trim();
+    }
+    if (!title || title.length < 2) {
+      // Walk up to find a container with a title
+      const container = link.closest('[class*="item"], [class*="conversation"], [class*="session"], [class*="chat"]');
+      if (container) {
+        const text = container.textContent.replace(/📌|📌|⭐/g, '').trim();
+        if (text.length > 2) title = text;
       }
     }
+    if (!title) title = id;
 
-    chrome.storage.local.set({ deepseekLoadProgress: sessions.length });
+    // Check for pinned status
+    const pinned = link.textContent.includes('📌') || link.textContent.includes('📌') ||
+                   link.querySelector('[class*="pin"]') !== null;
 
-    if (!bizData.has_more || pageItems.length === 0 || newCount === 0) break;
-
-    const last = pageItems[pageItems.length - 1];
-    url = `https://chat.deepseek.com/api/v0/chat_session/fetch_page?lte_cursor.pinned=false&lte_cursor.updated_at=${last.updated_at}`;
-    page++;
+    sessions.push({ id, title, updated_at: 0, pinned });
   }
 
-  console.log(`DeepSeek Exporter: fetched ${sessions.length} conversations total`);
+  console.log(`DeepSeek Exporter: scraped ${sessions.length} unique conversations from DOM`);
+  return sessions;
+}
+
+// Fetch all conversations — tries DOM scraping first, falls back to API
+async function fetchAllConversations() {
+  // Strategy 1: scrape from sidebar DOM (bypasses API limits entirely)
+  const domSessions = scrapeConversationsFromDOM();
+  if (domSessions.length > 0) {
+    console.log(`DeepSeek Exporter: using ${domSessions.length} conversations from DOM`);
+    chrome.storage.local.set({ deepseekLoadProgress: domSessions.length });
+    return domSessions;
+  }
+
+  // Strategy 2: fallback to API (capped at 100)
+  console.log('DeepSeek Exporter: DOM empty, falling back to API');
+  const bizData = await apiFetch('https://chat.deepseek.com/api/v0/chat_session/fetch_page');
+  const sessions = bizData.chat_sessions || [];
+  console.log(`DeepSeek Exporter: API returned ${sessions.length} conversations`);
+  chrome.storage.local.set({ deepseekLoadProgress: sessions.length });
   return sessions;
 }
 

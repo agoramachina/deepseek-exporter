@@ -12,7 +12,7 @@ A browser extension for Chrome and Firefox that allows you to export your DeepSe
 - 📝 **Multiple Formats** - JSON (full data), Markdown, or Plain Text
 - 🗂️ **ZIP Archives** - Bulk exports create organized ZIP files with all of your chats
 - 🏷️ **Metadata Options** - Include or exclude timestamps, ids, and other metadata
-- ⚓ **Stable** - Fetches chats through API rather than DOM
+- ⚓ **No API Limits** - Uses DOM scraping to bypass the 100-chat API pagination cap
 - 🔒 **Secure** - All data processing is local and never shared
 - ☀️ **Light/Dark Mode** - Toggle between color schemes
 
@@ -51,9 +51,11 @@ Available as a [Firefox extension] —**Coming Soon!**
 4. Click "Export Current Chat"
 
 #### Browse All Chats
-1. Click the extension icon
-2. Click "Browse All Chats" (green button)
-3. In the browse page, you can:
+1. Navigate to [DeepSeek Chat](https://chat.deepseek.com/a/chat/s) — this page shows your full conversation sidebar
+2. **Scroll down through your entire conversation list** in the sidebar to load all chats into the page
+3. Click the extension icon
+4. Click "Browse All Chats" (green button)
+5. In the browse page, you can:
    - Search chats by name
    - Sort by date or name
    - Export individual or multiple chats
@@ -93,6 +95,7 @@ Available as a [Firefox extension] —**Coming Soon!**
 ---
 ### Known Limitations
 
+- **Must scroll sidebar first**: Before browsing or bulk exporting, open `https://chat.deepseek.com/a/chat/s` and scroll down through your full conversation list in the sidebar. The extension scrapes conversations from the page DOM; only chats that have been scrolled into view will be detected.
 - Plaintext and markdown formats only export the currently selected branch in chats with multiple branches
 - Large bulk exports may take several minutes
 - Rate limiting: The extension processes chats in small batches to avoid overwhelming the API
