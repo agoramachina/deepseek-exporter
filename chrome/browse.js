@@ -517,9 +517,18 @@ function setupExportOptions() {
     }
   }
 
-  formatSelect.addEventListener('change', updateStates);
+  formatSelect.addEventListener('change', () => {
+    updateStates();
+    chrome.storage.local.set({ deepseekExportFormat: formatSelect.value });
+  });
   includeChats.addEventListener('change', updateStates);
-  updateStates();
+
+  chrome.storage.local.get('deepseekExportFormat', (result) => {
+    if (result.deepseekExportFormat) {
+      formatSelect.value = result.deepseekExportFormat;
+    }
+    updateStates();
+  });
 }
 
 // ---- Init ----
