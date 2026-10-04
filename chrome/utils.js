@@ -1,12 +1,50 @@
 // Shared utility functions for DeepSeek Exporter
 
+// Fragment types used by the current DeepSeek API message structure
+const FRAGMENT_RESPONSE_TYPES = ['RESPONSE', 'TEMPLATE_RESPONSE'];
+const FRAGMENT_THINK_TYPE = 'THINK';
+
+// Extract the main text content of a message.
+// Older API responses used message.content; the current ones use message.fragments.
+function getMessageText(message) {
+  if (!message) return '';
+  if (typeof message.content === 'string' && message.content.trim()) {
+    return message.content;
+  }
+  if (Array.isArray(message.fragments)) {
+    const types = message.role === 'USER' ? ['REQUEST'] : FRAGMENT_RESPONSE_TYPES;
+    return message.fragments
+      .filter(f => types.includes(f.type) && typeof f.content === 'string' && f.content.trim())
+      .map(f => f.content)
+      .join('\n\n');
+  }
+  return '';
+}
+
+// Extract the thinking content of a message.
+// Older API responses used message.thinking_content; the current ones use fragments.
+function getThinkingText(message) {
+  if (!message) return '';
+  if (typeof message.thinking_content === 'string' && message.thinking_content.trim()) {
+    return message.thinking_content;
+  }
+  if (Array.isArray(message.fragments)) {
+    return message.fragments
+      .filter(f => f.type === FRAGMENT_THINK_TYPE && typeof f.content === 'string' && f.content.trim())
+      .map(f => f.content)
+      .join('\n\n');
+  }
+  return '';
+}
+
 // Helper function to reconstruct the current branch from the message tree
 function getCurrentBranch(data) {
   if (!data.chat_messages || !data.chat_session) {
     return [];
   }
 
-  const leafId = data.chat_session.current_message_id;
+  const leafId = data.chat_session.current_message_id ||
+    (data.chat_messages.length > 0 ? data.chat_messages[data.chat_messages.length - 1].message_id : null);
 
   // Create a map of message_id to message for quick lookup
   const messageMap = new Map();
@@ -53,12 +91,14 @@ function convertToMarkdown(data, includeMetadata, sessionId = null, includeThink
     }
     markdown += `\n`;
 
-    if (includeThinking && message.thinking_content) {
-      markdown += `### Thinking\n\`\`\`\`\n${message.thinking_content}\n\`\`\`\`\n\n`;
+    const thinking = getThinkingText(message);
+    if (includeThinking && thinking) {
+      markdown += `### Thinking\n\`\`\`\`\n${thinking}\n\`\`\`\`\n\n`;
     }
 
-    if (message.content) {
-      markdown += `${message.content}\n\n`;
+    const content = getMessageText(message);
+    if (content) {
+      markdown += `${content}\n\n`;
     }
   }
 
@@ -82,11 +122,12 @@ function convertToText(data, includeMetadata, includeThinking = true) {
   branchMessages.forEach((message) => {
     const senderLabel = message.role === 'USER' ? 'User' : 'DeepSeek';
 
-    if (includeThinking && message.thinking_content) {
-      text += `[Thinking]\n${message.thinking_content}\n[End Thinking]\n\n`;
+    const thinking = getThinkingText(message);
+    if (includeThinking && thinking) {
+      text += `[Thinking]\n${thinking}\n[End Thinking]\n\n`;
     }
 
-    text += `${senderLabel}: ${message.content || ''}\n\n`;
+    text += `${senderLabel}: ${getMessageText(message)}\n\n`;
   });
 
   return text.trim();
