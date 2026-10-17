@@ -19,7 +19,7 @@ For users who want to install manually without the browser stores.
 
 ### Chrome (and Chromium-based browsers)
 
-1. Download the `deepseek-exporter-chrome-vX.X.X.zip` from the [Releases page](https://github.com/agoramachina/deepseek-exporter/releases)
+1. Download the `deepseek-exporter-chrome.zip` from the [Releases page](https://github.com/agoramachina/deepseek-exporter/releases)
 2. Extract the zip into a safe folder (this will be the permanent location - don't move or delete it!)
 3. Open Chrome and navigate to `chrome://extensions/`
 4. Enable **Developer mode** (toggle in top right)

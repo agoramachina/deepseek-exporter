@@ -13,6 +13,15 @@
 
 ### Medium Priority 🟡
 
+- **Automate Firefox signing in the release workflow**
+  - Add a `web-ext sign` step to `.github/workflows/release.yml` to sign the .xpi and submit to AMO on tag push
+  - Needs AMO API credentials (`WEB_EXT_API_KEY` / `WEB_EXT_API_SECRET`) stored as GitHub repo secrets
+  - Attach the signed .xpi to the GitHub release alongside the zips
+
+- **Automate Chrome Web Store upload in the release workflow**
+  - Use the Chrome Web Store API (e.g. `chrome-webstore-upload-cli`) to upload + publish the chrome zip on tag push
+  - Needs a Google Cloud OAuth client (client ID, secret, refresh token) and the extension ID, stored as GitHub repo secrets
+
 - **"Chat" checkbox is vestigial**
   - Unchecking it disables the Thinking/Metadata options, but no converter reads `includeChats`, so chats are exported regardless
   - Leftover from the Claude Exporter port (where it toggles chat text vs. artifacts-only). Either remove it from popup + browse, or give it a meaning
@@ -33,6 +42,15 @@
 (none currently open)
 
 ## Completed ✅
+
+- **GitHub Actions release + checks workflows** (v1.4.2)
+  - Tag push (`vX.Y.Z`) runs checks + tests, builds both zips, and creates the GitHub release with CHANGELOG notes since the last `_Published_`; manual run = dry-run artifact
+  - Every push to `testing`: manifest versions, Chrome/Firefox parity, JS syntax, vitest, `web-ext lint`, test build
+  - Scripts in `.github/scripts/` are shared with Claude Exporter (only `ALLOWED_DIFFS` differs)
+
+- **Vitest unit tests for `utils.js`** (v1.4.2)
+  - 21 tests: branch traversal, Markdown/plain-text conversion (thinking, metadata, title fallback), `sanitizeFilename`, `uniqueFilename`, `getLocalDateTimeString`
+  - `npm test` from `tests/`; canonical source is `chrome/utils.js`, `firefox/utils.js` must mirror (enforced by the checks workflow)
 
 - **Store listings** (v1.4.2)
   - Live on the [Chrome Web Store](https://chromewebstore.google.com/detail/deepseek-exporter/iephoekbbcoecicnjjfiljochnpekmnb) and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/deepseek-exporter/); README + INSTALL.md linked

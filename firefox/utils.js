@@ -138,3 +138,16 @@ function downloadFile(content, filename, type = 'application/json') {
   // Revoking synchronously can cancel the download in Firefox
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
+
+// In Node (vitest), expose them via module.exports for testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    getCurrentBranch,
+    convertToMarkdown,
+    convertToText,
+    sanitizeFilename,
+    uniqueFilename,
+    getLocalDateTimeString,
+    downloadFile,
+  };
+}

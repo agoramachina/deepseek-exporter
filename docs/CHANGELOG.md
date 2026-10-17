@@ -14,6 +14,8 @@
 - README: plain-text format uses `User:` / `DeepSeek:` prefixes (was documented as `Claude:`).
 - Added `docs/` folder: INSTALL.md, TODO.md, CHANGELOG.md (same structure as Claude Exporter).
 - README + INSTALL.md now link the Chrome Web Store and Firefox Add-ons listings (were "Coming Soon").
+- Added vitest unit tests (`tests/`, 21 tests) for branch traversal, Markdown/plain-text conversion, and the filename helpers. `utils.js` exposes its functions via a Node-only `module.exports` block (ignored in the browser).
+- Releases are now built by GitHub Actions: pushing a `vX.Y.Z` tag runs checks + tests, builds `deepseek-exporter-chrome.zip` / `deepseek-exporter-firefox.zip`, and creates the GitHub release with notes from this CHANGELOG. A checks workflow runs on every push to `testing`. README + INSTALL.md updated to the actual zip name (no `-vX.X.X` suffix).
 
 ## [1.4.1]
 
