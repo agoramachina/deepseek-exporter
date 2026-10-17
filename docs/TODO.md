@@ -46,7 +46,7 @@
   - Blob URLs revoked after a delay; ZIP downloads go through shared `downloadFile()`
 
 - **Popup theme sync with browse page** (v1.4.2)
-  - Popup reads the same `deepseek-exporter-theme` key the browse page writes
+  - Popup and browse page now share the same `theme` localStorage key (matches Claude Exporter)
 
 - **Export Selected includes chats hidden by search** (v1.4.2)
 

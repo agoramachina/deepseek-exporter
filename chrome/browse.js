@@ -28,7 +28,7 @@ function saveCreatedDate(sessionId, insertedAt) {
 // ---- Theme ----
 
 function initTheme() {
-  const saved = localStorage.getItem('deepseek-exporter-theme');
+  const saved = localStorage.getItem('theme');
   const sunIcon = document.querySelector('.sun-icon');
   const moonIcon = document.querySelector('.moon-icon');
   if (saved) {
@@ -57,7 +57,7 @@ function toggleTheme() {
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const newTheme = current ? (current === 'dark' ? 'light' : 'dark') : (prefersDark ? 'light' : 'dark');
   document.documentElement.setAttribute('data-theme', newTheme);
-  localStorage.setItem('deepseek-exporter-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
   updateThemeIcon(newTheme, sunIcon, moonIcon);
 }
 
