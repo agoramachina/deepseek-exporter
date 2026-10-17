@@ -28,14 +28,14 @@
 
 - **Sync to Google Drive or local filesystem**
 
-- **Store listings**
-  - Publish to Chrome Web Store and Firefox Add-ons; update README + INSTALL.md links
-
 ## Bugs 🐛
 
 (none currently open)
 
 ## Completed ✅
+
+- **Store listings** (v1.4.2)
+  - Live on the [Chrome Web Store](https://chromewebstore.google.com/detail/deepseek-exporter/iephoekbbcoecicnjjfiljochnpekmnb) and [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/deepseek-exporter/); README + INSTALL.md linked
 
 - **Duplicate-title ZIP overwrites + filename sanitizing** (v1.4.2)
   - Bulk exports no longer drop same-titled chats (`uniqueFilename()` suffixes `(2)`, `(3)`, …)

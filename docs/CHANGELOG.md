@@ -13,6 +13,7 @@
 - `getLocalDateTimeString()` moved to shared `utils.js` (was inline in `content.js` and duplicated in `browse.js`).
 - README: plain-text format uses `User:` / `DeepSeek:` prefixes (was documented as `Claude:`).
 - Added `docs/` folder: INSTALL.md, TODO.md, CHANGELOG.md (same structure as Claude Exporter).
+- README + INSTALL.md now link the Chrome Web Store and Firefox Add-ons listings (were "Coming Soon").
 
 ## [1.4.1]
 

@@ -6,10 +6,10 @@ Complete installation instructions for DeepSeek Exporter on Chrome and Firefox.
 
 The simplest way to install DeepSeek Exporter and receive automatic updates:
 
-- **Chrome/Chromium-based browsers:** Chrome Web Store — **Coming Soon!**
-- **Firefox:** Firefox Add-ons — **Coming Soon!**
+- **Chrome/Chromium-based browsers:** [Chrome Web Store](https://chromewebstore.google.com/detail/deepseek-exporter/iephoekbbcoecicnjjfiljochnpekmnb)
+- **Firefox:** [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/deepseek-exporter/)
 
-Until the store listings are live, use one of the methods below.
+After installing, proceed to [Configuration](#configuration).
 
 ---
 
