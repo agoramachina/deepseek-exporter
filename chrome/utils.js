@@ -27,6 +27,37 @@ function getCurrentBranch(data) {
   return branch;
 }
 
+// --- NEW: fragment-based content extraction ---
+// DeepSeek's API used to expose a flat `message.content` string plus a
+// separate `message.thinking_content` field. It now nests everything inside
+// a `fragments` array, each fragment tagged with a `type`
+// (REQUEST / SEARCH / THINK / RESPONSE) and its own `content` string.
+// These helpers extract the right fragment(s) and fall back to the old
+// flat fields if they're ever present, so nothing breaks either way.
+
+function extractFragmentText(message, types) {
+  if (!message.fragments || !Array.isArray(message.fragments)) return '';
+  return message.fragments
+    .filter(f => types.includes(f.type) && f.content)
+    .map(f => f.content)
+    .join('\n\n');
+}
+
+// Main visible content of a message (the question for USER, the answer for ASSISTANT)
+function getMessageContent(message) {
+  if (message.content) return message.content; // backward compat, old flat format
+  if (message.role === 'USER') {
+    return extractFragmentText(message, ['REQUEST']);
+  }
+  return extractFragmentText(message, ['RESPONSE']);
+}
+
+// Thinking/reasoning content of a message, if any
+function getMessageThinking(message) {
+  if (message.thinking_content) return message.thinking_content; // backward compat
+  return extractFragmentText(message, ['THINK']);
+}
+
 // Convert to markdown format
 function convertToMarkdown(data, includeMetadata, sessionId = null, includeThinking = true) {
   const session = data.chat_session;
@@ -53,12 +84,14 @@ function convertToMarkdown(data, includeMetadata, sessionId = null, includeThink
     }
     markdown += `\n`;
 
-    if (includeThinking && message.thinking_content) {
-      markdown += `### Thinking\n\`\`\`\`\n${message.thinking_content}\n\`\`\`\`\n\n`;
+    const thinking = includeThinking ? getMessageThinking(message) : '';
+    if (thinking) {
+      markdown += `### Thinking\n\`\`\`\`\n${thinking}\n\`\`\`\`\n\n`;
     }
 
-    if (message.content) {
-      markdown += `${message.content}\n\n`;
+    const content = getMessageContent(message);
+    if (content) {
+      markdown += `${content}\n\n`;
     }
   }
 
@@ -82,11 +115,12 @@ function convertToText(data, includeMetadata, includeThinking = true) {
   branchMessages.forEach((message) => {
     const senderLabel = message.role === 'USER' ? 'User' : 'DeepSeek';
 
-    if (includeThinking && message.thinking_content) {
-      text += `[Thinking]\n${message.thinking_content}\n[End Thinking]\n\n`;
+    const thinking = includeThinking ? getMessageThinking(message) : '';
+    if (thinking) {
+      text += `[Thinking]\n${thinking}\n[End Thinking]\n\n`;
     }
 
-    text += `${senderLabel}: ${message.content || ''}\n\n`;
+    text += `${senderLabel}: ${getMessageContent(message)}\n\n`;
   });
 
   return text.trim();
