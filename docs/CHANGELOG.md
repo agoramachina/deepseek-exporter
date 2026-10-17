@@ -20,6 +20,8 @@
 - Fixed browse window
 - Firefox manifest permissions (`data_collection_permissions`, `strict_min_version`)
 
+_Published_
+
 ## [1.4.0]
 
 - Firefox port (Manifest V3 with `background.scripts`)
