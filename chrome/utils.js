@@ -177,6 +177,8 @@ function downloadFile(content, filename, type = 'application/json') {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
     getCurrentBranch,
+    getMessageContent,
+    getMessageThinking,
     convertToMarkdown,
     convertToText,
     sanitizeFilename,

@@ -2,6 +2,7 @@
 
 ## [1.4.2]
 
+- **Fixed Markdown and plain-text exports coming out empty.** DeepSeek moved message text from the flat `content` / `thinking_content` fields into a typed `fragments` array (`REQUEST`, `SEARCH`, `THINK`, `RESPONSE`), so exports contained only the `User:` / `DeepSeek:` labels. New `getMessageContent()` / `getMessageThinking()` read the fragments (search results are skipped) and fall back to the old fields. JSON exports were unaffected. Thanks to [@m-tommy](https://github.com/m-tommy) ([PR #9](https://github.com/agoramachina/deepseek-exporter/pull/9)).
 - Fixed bulk ZIP exports silently dropping chats that share a title (e.g. several "New chat"s). `zip.file()` replaces same-named entries, so only the last one survived. Duplicates are now suffixed `" (2)"`, `" (3)"`, … via new `uniqueFilename()` (case-insensitive, since Windows/macOS filesystems are). Applies to both popup Export All and browse-page Export Selected/All.
 - New `sanitizeFilename()` strips control characters/newlines, trailing dots/spaces, and caps length at 150; falls back to `"Untitled Chat"`. Replaces four copies of the inline invalid-character regex.
 - Blob download URLs are now revoked after a delay instead of synchronously after `a.click()`, which can cancel the download in Firefox. ZIP downloads reuse `downloadFile()` instead of duplicating the anchor-click code.

@@ -3,6 +3,8 @@ import utils from '../chrome/utils.js';
 
 const {
   getCurrentBranch,
+  getMessageContent,
+  getMessageThinking,
   convertToMarkdown,
   convertToText,
   sanitizeFilename,
@@ -164,5 +166,72 @@ describe('uniqueFilename', () => {
 describe('getLocalDateTimeString', () => {
   it('formats as YYYYMMDD-HHMMSS', () => {
     expect(getLocalDateTimeString()).toMatch(/^\d{8}-\d{6}$/);
+  });
+});
+
+// Regression coverage for PR #9: DeepSeek moved message text out of the flat
+// `content` / `thinking_content` fields into a typed `fragments` array, which
+// made Markdown and plain-text exports come out empty (JSON was unaffected).
+function makeFragmentConversation() {
+  return {
+    chat_session: { id: 's', title: 'Fragments', inserted_at: 1735689600, updated_at: 1735689600, current_message_id: 2 },
+    chat_messages: [
+      {
+        message_id: 1, parent_id: null, role: 'USER', inserted_at: 1735689600,
+        fragments: [{ type: 'REQUEST', content: 'What is 2+2?' }],
+      },
+      {
+        message_id: 2, parent_id: 1, role: 'ASSISTANT', inserted_at: 1735689610,
+        fragments: [
+          { type: 'SEARCH', content: 'Found 9 web pages', results: [{ url: 'https://example.com' }] },
+          { type: 'THINK', content: 'Simple arithmetic.' },
+          { type: 'RESPONSE', content: 'Four.' },
+        ],
+      },
+    ],
+  };
+}
+
+describe('fragment-format messages (PR #9)', () => {
+  const [user, assistant] = makeFragmentConversation().chat_messages;
+
+  it('reads REQUEST for user messages and RESPONSE for assistant messages', () => {
+    expect(getMessageContent(user)).toBe('What is 2+2?');
+    expect(getMessageContent(assistant)).toBe('Four.');
+  });
+
+  it('reads THINK as thinking, and ignores SEARCH fragments', () => {
+    expect(getMessageThinking(assistant)).toBe('Simple arithmetic.');
+    expect(getMessageContent(assistant)).not.toContain('Found 9 web pages');
+  });
+
+  it('joins multiple fragments of the same type', () => {
+    const msg = { role: 'ASSISTANT', fragments: [
+      { type: 'RESPONSE', content: 'Part one.' },
+      { type: 'RESPONSE', content: 'Part two.' },
+    ] };
+    expect(getMessageContent(msg)).toBe('Part one.\n\nPart two.');
+  });
+
+  it('prefers legacy flat fields when present', () => {
+    const msg = { role: 'ASSISTANT', content: 'Old', thinking_content: 'Old think',
+      fragments: [{ type: 'RESPONSE', content: 'New' }, { type: 'THINK', content: 'New think' }] };
+    expect(getMessageContent(msg)).toBe('Old');
+    expect(getMessageThinking(msg)).toBe('Old think');
+  });
+
+  it('returns empty strings when there is no content at all', () => {
+    expect(getMessageContent({ role: 'USER' })).toBe('');
+    expect(getMessageThinking({ role: 'ASSISTANT', fragments: [] })).toBe('');
+  });
+
+  it('produces non-empty Markdown and plain text', () => {
+    const data = makeFragmentConversation();
+    const md = convertToMarkdown(data, false);
+    expect(md).toContain('What is 2+2?');
+    expect(md).toContain('### Thinking\n````\nSimple arithmetic.\n````');
+    expect(md).toContain('Four.');
+
+    expect(convertToText(data, false, false)).toBe('User: What is 2+2?\n\nDeepSeek: Four.');
   });
 });

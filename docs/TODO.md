@@ -6,11 +6,6 @@
 
 ### High Priority 🟠
 
-- **Verify message format against the live DeepSeek API**
-  - `convertToMarkdown` / `convertToText` in [chrome/utils.js](../chrome/utils.js) read `message.content` and `message.thinking_content`
-  - If DeepSeek has moved to a different message structure (e.g. a `fragments` array), Markdown and plain-text exports would come out empty while JSON still works
-  - Export one real chat in each format and compare against the JSON
-
 ### Medium Priority 🟡
 
 - **Automate Firefox signing in the release workflow**
@@ -42,6 +37,11 @@
 (none currently open)
 
 ## Completed ✅
+
+- **Fix empty Markdown/plain-text exports after DeepSeek's message format change** (v1.4.2)
+  - DeepSeek moved message text into a typed `fragments` array (`REQUEST` / `SEARCH` / `THINK` / `RESPONSE`); converters read the old flat `content` / `thinking_content` fields, so exports had only `User:` / `DeepSeek:` labels
+  - Fix contributed by @m-tommy in [PR #9](https://github.com/agoramachina/deepseek-exporter/pull/9): `getMessageContent()` / `getMessageThinking()` read fragments, falling back to the legacy fields
+  - Regression tests cover both formats
 
 - **GitHub Actions release + checks workflows** (v1.4.2)
   - Tag push (`vX.Y.Z`) runs checks + tests, builds both zips, and creates the GitHub release with CHANGELOG notes since the last `_Published_`; manual run = dry-run artifact
