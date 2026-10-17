@@ -80,8 +80,8 @@ Available as a [Firefox extension] —**Coming Soon!**
 - Great for documentation or sharing
 
 #### Plain Text
-- Simple format following Claude's prompt style
-- Uses "User:" and "Claude:" prefixes
+- Simple transcript format
+- Uses "User:" and "DeepSeek:" prefixes
 - Shows only the current chat branch
 - Ideal for copying into other LLMs or text editors
 

@@ -4,18 +4,6 @@ if (window.deepseekExporterContentScriptLoaded) {
 } else {
   window.deepseekExporterContentScriptLoaded = true;
 
-// Helper to format datetime for filenames (e.g. 20250301-143045)
-function getLocalDateTimeString() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  return `${year}${month}${day}-${hours}${minutes}${seconds}`;
-}
-
 // Get auth token from localStorage
 function getAuthToken() {
   const userToken = localStorage.getItem('userToken');
@@ -110,7 +98,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
           throw new Error('Invalid conversation data. Please refresh the page and try again.');
         }
 
-        const title = (data.chat_session?.title || request.conversationId).replace(/[<>:"/\\|?*]/g, '_');
+        const title = sanitizeFilename(data.chat_session?.title || request.conversationId);
         const includeThinking = request.includeThinking !== false;
         let content, filename, type;
 
@@ -155,12 +143,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         const errors = [];
         const includeThinking = request.includeThinking !== false;
         const ext = request.format === 'markdown' ? 'md' : request.format === 'json' ? 'json' : 'txt';
+        const usedNames = new Set();
 
         for (const session of sessions) {
           try {
             console.log(`Fetching conversation ${count + 1}/${sessions.length}: ${session.title}`);
             const data = await fetchConversation(session.id);
-            const filename = (session.title || session.id).replace(/[<>:"/\\|?*]/g, '_');
+            const filename = uniqueFilename(sanitizeFilename(session.title || session.id), ext, usedNames);
 
             let content;
             if (request.format === 'markdown') {
@@ -170,7 +159,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             } else {
               content = convertToText(data, request.includeMetadata, includeThinking);
             }
-            zip.file(`${filename}.${ext}`, content);
+            zip.file(filename, content);
 
             count++;
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -181,16 +170,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }
 
         const datetime = getLocalDateTimeString();
-        zip.generateAsync({ type: 'blob' }).then(blob => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `deepseek-exports-${datetime}.zip`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        });
+        const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+        downloadFile(blob, `deepseek-exports-${datetime}.zip`, 'application/zip');
 
         if (errors.length > 0) {
           sendResponse({

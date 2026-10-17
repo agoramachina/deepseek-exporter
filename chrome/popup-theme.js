@@ -2,8 +2,8 @@
 // This runs immediately to sync with browse window theme preference
 
 (function() {
-  // Check if user has set a theme in browse window (stored in localStorage)
-  const savedTheme = localStorage.getItem('theme');
+  // Check if user has set a theme in browse window (stored in localStorage by browse.js)
+  const savedTheme = localStorage.getItem('deepseek-exporter-theme');
 
   if (savedTheme) {
     // Use saved theme from browse window
@@ -25,7 +25,7 @@
 
   // Listen for storage changes (when browse window changes theme)
   window.addEventListener('storage', (e) => {
-    if (e.key === 'theme') {
+    if (e.key === 'deepseek-exporter-theme') {
       if (e.newValue === 'light') {
         document.documentElement.setAttribute('data-theme', 'light');
       } else {
@@ -36,13 +36,13 @@
 
   // Listen for system theme changes (only if no saved preference)
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!localStorage.getItem('theme') && e.matches) {
+    if (!localStorage.getItem('deepseek-exporter-theme') && e.matches) {
       document.documentElement.removeAttribute('data-theme');
     }
   });
 
   window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
-    if (!localStorage.getItem('theme') && e.matches) {
+    if (!localStorage.getItem('deepseek-exporter-theme') && e.matches) {
       document.documentElement.setAttribute('data-theme', 'light');
     }
   });

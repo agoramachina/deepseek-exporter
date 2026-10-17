@@ -92,7 +92,40 @@ function convertToText(data, includeMetadata, includeThinking = true) {
   return text.trim();
 }
 
-// Download file utility
+// Make a chat title safe to use as a filename
+function sanitizeFilename(name) {
+  const safe = String(name || '')
+    .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/[. ]+$/, '')
+    .slice(0, 150);
+  return safe || 'Untitled Chat';
+}
+
+// Return a filename not already in `used` (adds it), suffixing " (2)", " (3)", ... on collision
+function uniqueFilename(base, ext, used) {
+  let name = `${base}.${ext}`;
+  for (let n = 2; used.has(name.toLowerCase()); n++) {
+    name = `${base} (${n}).${ext}`;
+  }
+  used.add(name.toLowerCase());
+  return name;
+}
+
+// Helper to format datetime for filenames (e.g. 20250301-143045)
+function getLocalDateTimeString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  return `${year}${month}${day}-${hours}${minutes}${seconds}`;
+}
+
+// Download file utility (content may be a string or a Blob)
 function downloadFile(content, filename, type = 'application/json') {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
@@ -102,5 +135,6 @@ function downloadFile(content, filename, type = 'application/json') {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // Revoking synchronously can cancel the download in Firefox
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
