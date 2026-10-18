@@ -30,7 +30,16 @@
 
 ## Bugs 🐛
 
-(none currently open)
+- **Browse / Export All stop at 100 chats** ([issue #1](https://github.com/agoramachina/deepseek-exporter/issues/1))
+  - Cause (confirmed by [PR #4](https://github.com/agoramachina/deepseek-exporter/pull/4)): `chat_session/fetch_page` ignores the `lte_cursor.updated_at` cursor and returns the same 100 chats every time, with `has_more: true`. `fetchAllConversations()` in `content.js` sees no new chats on page 2 and stops
+  - Next step: capture how DeepSeek's *own* sidebar loads older chats (DevTools → Network while scrolling the sidebar past 100): request URL + response field names
+  - Avoid PR #4's DOM-scraping approach if possible: it needs the user to scroll the whole sidebar first, and the README promises API-based fetching
+  - Getting the capture: AM's own account only has ~5 real chats, and chats from DeepSeek's *developer* API don't appear in the web sidebar. Mass-creating test chats got the account temporarily locked on 2026-10-17 (100 rapid "ping test" chats, with AM and Haiku both driving the same browser). Instead, ask the issue #1 participants (@ziio2110, @iomari, @JackyTJie of PR #4) for a DevTools capture of the sidebar's paging request: URL and response field names, no auth headers
+  - Testing: save the captured responses as test data and replay them in vitest, so tests never touch DeepSeek's servers
+
+- **Reduce load on DeepSeek's servers so users don't get flagged**
+  - Opening the browse page fetches every chat's full history (`eagerLoadCreatedDates`, every 200 ms) just to fill in the Created column. Check whether `fetch_page` items already include a creation time, or fetch dates only when sorting by Created
+  - Bulk export fetches every chat 300–500 ms apart with no backoff. Add retry with exponential backoff on errors or rate-limit responses, and slightly randomized delays
 
 ## Completed ✅
 
