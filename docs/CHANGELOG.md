@@ -18,6 +18,9 @@
 - Added vitest unit tests (`tests/`, 21 tests) for branch traversal, Markdown/plain-text conversion, and the filename helpers. `utils.js` exposes its functions via a Node-only `module.exports` block (ignored in the browser).
 - Releases are now built by GitHub Actions: pushing a `vX.Y.Z` tag runs checks + tests, builds `deepseek-exporter-chrome_vX.Y.Z.zip` / `deepseek-exporter-firefox_vX.Y.Z.zip`, and creates the GitHub release with notes from this CHANGELOG. A checks workflow runs on every push to `testing`. README + INSTALL.md updated to the versioned zip names.
 - Releases now submit to the stores automatically: pushing a `vX.Y.Z` tag builds both zips, submits them to the Chrome Web Store (API v2, authenticated through Workload Identity Federation with no stored key) and Firefox Add-ons (`web-ext sign`) in parallel, and creates the GitHub release only once both submissions succeed. Store credentials live in a `stores` GitHub environment limited to version tags.
+- README renamed to `README.md`, so GitHub renders it as formatted Markdown (same change @spinnyspider proposed in [PR #3](https://github.com/agoramachina/deepseek-exporter/pull/3)).
+- Added a Sponsor button (`.github/FUNDING.yml`).
+- Browse and Export All load more than 100 chats again ([issue #1](https://github.com/agoramachina/deepseek-exporter/issues/1)). DeepSeek's `fetch_page` paging works server-side again; no code change was needed. Verified with a 109-chat export.
 
 ## [1.4.1]
 
