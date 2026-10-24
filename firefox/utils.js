@@ -27,6 +27,37 @@ function getCurrentBranch(data) {
   return branch;
 }
 
+// --- NEW: fragment-based content extraction ---
+// DeepSeek's API used to expose a flat `message.content` string plus a
+// separate `message.thinking_content` field. It now nests everything inside
+// a `fragments` array, each fragment tagged with a `type`
+// (REQUEST / SEARCH / THINK / RESPONSE) and its own `content` string.
+// These helpers extract the right fragment(s) and fall back to the old
+// flat fields if they're ever present, so nothing breaks either way.
+
+function extractFragmentText(message, types) {
+  if (!message.fragments || !Array.isArray(message.fragments)) return '';
+  return message.fragments
+    .filter(f => types.includes(f.type) && f.content)
+    .map(f => f.content)
+    .join('\n\n');
+}
+
+// Main visible content of a message (the question for USER, the answer for ASSISTANT)
+function getMessageContent(message) {
+  if (message.content) return message.content; // backward compat, old flat format
+  if (message.role === 'USER') {
+    return extractFragmentText(message, ['REQUEST']);
+  }
+  return extractFragmentText(message, ['RESPONSE']);
+}
+
+// Thinking/reasoning content of a message, if any
+function getMessageThinking(message) {
+  if (message.thinking_content) return message.thinking_content; // backward compat
+  return extractFragmentText(message, ['THINK']);
+}
+
 // Convert to markdown format
 function convertToMarkdown(data, includeMetadata, sessionId = null, includeThinking = true) {
   const session = data.chat_session;
@@ -53,12 +84,14 @@ function convertToMarkdown(data, includeMetadata, sessionId = null, includeThink
     }
     markdown += `\n`;
 
-    if (includeThinking && message.thinking_content) {
-      markdown += `### Thinking\n\`\`\`\`\n${message.thinking_content}\n\`\`\`\`\n\n`;
+    const thinking = includeThinking ? getMessageThinking(message) : '';
+    if (thinking) {
+      markdown += `### Thinking\n\`\`\`\`\n${thinking}\n\`\`\`\`\n\n`;
     }
 
-    if (message.content) {
-      markdown += `${message.content}\n\n`;
+    const content = getMessageContent(message);
+    if (content) {
+      markdown += `${content}\n\n`;
     }
   }
 
@@ -82,17 +115,51 @@ function convertToText(data, includeMetadata, includeThinking = true) {
   branchMessages.forEach((message) => {
     const senderLabel = message.role === 'USER' ? 'User' : 'DeepSeek';
 
-    if (includeThinking && message.thinking_content) {
-      text += `[Thinking]\n${message.thinking_content}\n[End Thinking]\n\n`;
+    const thinking = includeThinking ? getMessageThinking(message) : '';
+    if (thinking) {
+      text += `[Thinking]\n${thinking}\n[End Thinking]\n\n`;
     }
 
-    text += `${senderLabel}: ${message.content || ''}\n\n`;
+    text += `${senderLabel}: ${getMessageContent(message)}\n\n`;
   });
 
   return text.trim();
 }
 
-// Download file utility
+// Make a chat title safe to use as a filename
+function sanitizeFilename(name) {
+  const safe = String(name || '')
+    .replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/[. ]+$/, '')
+    .slice(0, 150);
+  return safe || 'Untitled Chat';
+}
+
+// Return a filename not already in `used` (adds it), suffixing " (2)", " (3)", ... on collision
+function uniqueFilename(base, ext, used) {
+  let name = `${base}.${ext}`;
+  for (let n = 2; used.has(name.toLowerCase()); n++) {
+    name = `${base} (${n}).${ext}`;
+  }
+  used.add(name.toLowerCase());
+  return name;
+}
+
+// Helper to format datetime for filenames (e.g. 20250301-143045)
+function getLocalDateTimeString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  return `${year}${month}${day}-${hours}${minutes}${seconds}`;
+}
+
+// Download file utility (content may be a string or a Blob)
 function downloadFile(content, filename, type = 'application/json') {
   const blob = new Blob([content], { type });
   const url = URL.createObjectURL(blob);
@@ -102,5 +169,21 @@ function downloadFile(content, filename, type = 'application/json') {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // Revoking synchronously can cancel the download in Firefox
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+// In Node (vitest), expose them via module.exports for testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    getCurrentBranch,
+    getMessageContent,
+    getMessageThinking,
+    convertToMarkdown,
+    convertToText,
+    sanitizeFilename,
+    uniqueFilename,
+    getLocalDateTimeString,
+    downloadFile,
+  };
 }

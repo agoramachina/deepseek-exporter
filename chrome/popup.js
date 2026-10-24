@@ -115,6 +115,10 @@ document.getElementById('exportAll').addEventListener('click', async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
+    if (!tab?.url?.includes('chat.deepseek.com')) {
+      throw new Error('Please navigate to a DeepSeek page first.');
+    }
+
     chrome.tabs.sendMessage(tab.id, {
       action: 'exportAllConversations',
       format: document.getElementById('format').value,

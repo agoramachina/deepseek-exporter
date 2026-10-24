@@ -2,7 +2,7 @@
 // This runs immediately to sync with browse window theme preference
 
 (function() {
-  // Check if user has set a theme in browse window (stored in localStorage)
+  // Check if user has set a theme in browse window (stored in localStorage by browse.js)
   const savedTheme = localStorage.getItem('theme');
 
   if (savedTheme) {

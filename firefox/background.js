@@ -6,7 +6,7 @@ browser.runtime.onInstalled.addListener(() => {
 // Inject content script into already-open DeepSeek tabs when extension is installed/updated
 browser.runtime.onInstalled.addListener(async () => {
   try {
-    const tabs = await browser.tabs.query({ url: 'https://chat.deepseek.com/a/chat/s/*' });
+    const tabs = await browser.tabs.query({ url: 'https://chat.deepseek.com/*' });
     for (const tab of tabs) {
       try {
         await browser.scripting.executeScript({

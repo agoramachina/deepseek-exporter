@@ -21,20 +21,20 @@ A browser extension for Chrome and Firefox that allows you to export your DeepSe
 The simplest way to install DeepSeek Exporter and receive automatic updates is through your browser's official Extensions page.
 
 #### Chrome and Chromium-based browsers
-Available on the [Chrome Web Store] —**Coming Soon!**
+Available on the [Chrome Web Store](https://chromewebstore.google.com/detail/deepseek-exporter/iephoekbbcoecicnjjfiljochnpekmnb)
 
 #### Firefox
-Available as a [Firefox extension] —**Coming Soon!**
+Available as a [Firefox extension](https://addons.mozilla.org/en-US/firefox/addon/deepseek-exporter/)
 
 ---
 ### Manual Installation
 
 #### Chrome and Chromium-based browsers
-1. Download the `deepseek-exporter-chrome-vX.X.X.zip` from the [Releases page](https://github.com/agoramachina/deepseek-exporter/releases)
+1. Download the `deepseek-exporter-chrome_vX.Y.Z.zip` from the [Releases page](https://github.com/agoramachina/deepseek-exporter/releases)
 2. Extract the zip into a safe folder (this will be the permanent location - don't move or delete it)
 3. Open Chrome and navigate to `chrome://extensions/`
 4. Enable **Developer mode** (toggle in top right)
-5. Click **Load unpacked** and select the extracted `deepseek-exporter-chrome` folder
+5. Click **Load unpacked** and select the extracted `deepseek-exporter-chrome_vX.Y.Z` folder
 
 #### Firefox
 1. Download the latest `.xpi` file from the [Releases page](https://github.com/agoramachina/deepseek-exporter/releases)
@@ -80,8 +80,8 @@ Available as a [Firefox extension] —**Coming Soon!**
 - Great for documentation or sharing
 
 #### Plain Text
-- Simple format following Claude's prompt style
-- Uses "User:" and "Claude:" prefixes
+- Simple transcript format
+- Uses "User:" and "DeepSeek:" prefixes
 - Shows only the current chat branch
 - Ideal for copying into other LLMs or text editors
 

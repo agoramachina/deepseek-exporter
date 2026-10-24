@@ -5,7 +5,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 // Inject content script into already-open DeepSeek tabs when extension is installed/updated
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.tabs.query({ url: 'https://chat.deepseek.com/a/chat/s/*' }, (tabs) => {
+  chrome.tabs.query({ url: 'https://chat.deepseek.com/*' }, (tabs) => {
     tabs.forEach(tab => {
       chrome.scripting.executeScript({
         target: { tabId: tab.id },

@@ -28,7 +28,7 @@ function saveCreatedDate(sessionId, insertedAt) {
 // ---- Theme ----
 
 function initTheme() {
-  const saved = localStorage.getItem('deepseek-exporter-theme');
+  const saved = localStorage.getItem('theme');
   const sunIcon = document.querySelector('.sun-icon');
   const moonIcon = document.querySelector('.moon-icon');
   if (saved) {
@@ -57,7 +57,7 @@ function toggleTheme() {
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   const newTheme = current ? (current === 'dark' ? 'light' : 'dark') : (prefersDark ? 'light' : 'dark');
   document.documentElement.setAttribute('data-theme', newTheme);
-  localStorage.setItem('deepseek-exporter-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
   updateThemeIcon(newTheme, sunIcon, moonIcon);
 }
 
@@ -356,7 +356,7 @@ async function exportSingle(sessionId, title, button) {
     const response = await sendMessageToDeepSeekTab('fetchConversationData', { sessionId });
     const data = response.data;
     saveCreatedDate(sessionId, data.chat_session?.inserted_at);
-    const safeName = (data.chat_session?.title || title || sessionId).replace(/[<>:"/\\|?*]/g, '_');
+    const safeName = sanitizeFilename(data.chat_session?.title || title || sessionId);
 
     let content, filename, type;
     if (format === 'markdown') {
@@ -389,8 +389,9 @@ async function exportMultiple() {
   const includeThinking = document.getElementById('includeThinking').checked;
   const includeMetadata = document.getElementById('includeMetadata').checked;
 
+  // Explicit selections are exported even if the current search hides them
   const toExport = selectedConversations.size > 0
-    ? filteredConversations.filter(s => selectedConversations.has(s.id))
+    ? allConversations.filter(s => selectedConversations.has(s.id))
     : filteredConversations;
 
   const button = document.getElementById('exportAllBtn');
@@ -410,6 +411,7 @@ async function exportMultiple() {
 
   const zip = new JSZip();
   const ext = format === 'markdown' ? 'md' : format === 'json' ? 'json' : 'txt';
+  const usedNames = new Set();
   const total = toExport.length;
   let completed = 0;
   const errors = [];
@@ -423,7 +425,7 @@ async function exportMultiple() {
       const response = await sendMessageToDeepSeekTab('fetchConversationData', { sessionId: session.id });
       const data = response.data;
       saveCreatedDate(session.id, data.chat_session?.inserted_at);
-      const filename = (session.title || session.id).replace(/[<>:"/\\|?*]/g, '_');
+      const filename = uniqueFilename(sanitizeFilename(session.title || session.id), ext, usedNames);
 
       let content;
       if (format === 'markdown') {
@@ -433,7 +435,7 @@ async function exportMultiple() {
       } else {
         content = convertToText(data, includeMetadata, includeThinking);
       }
-      zip.file(`${filename}.${ext}`, content);
+      zip.file(filename, content);
       completed++;
     } catch (error) {
       errors.push(`${session.title || session.id}: ${error.message}`);
@@ -447,27 +449,19 @@ async function exportMultiple() {
     await new Promise(resolve => setTimeout(resolve, 300));
   }
 
-  progressModal.style.display = 'none';
-  button.disabled = false;
-
   if (cancelled) {
+    progressModal.style.display = 'none';
+    button.disabled = false;
     showToast('Export cancelled', true);
     return;
   }
 
   progressText.textContent = 'Creating ZIP...';
-  const now = new Date();
-  const datetime = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
-
   const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `deepseek-exports-${datetime}.zip`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  downloadFile(blob, `deepseek-exports-${getLocalDateTimeString()}.zip`, 'application/zip');
+
+  progressModal.style.display = 'none';
+  button.disabled = false;
 
   if (errors.length > 0) {
     showToast(`Exported ${completed}/${total}. Failed: ${errors.join(', ')}`, true);
