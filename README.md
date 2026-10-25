@@ -125,5 +125,11 @@ Feel free to submit issues or pull requests if you find bugs or have suggestions
 - **Original Project**: Original exporter forked from [socketteer/Claude-chat-Exporter](https://github.com/socketteer/Claude-chat-Exporter)
 - **Code Development**: Written in collaboration with Claude Opus 4.6
 - **ZIP Library**: Uses [JSZip](https://stuk.github.io/jszip/) for creating ZIP archives
-
+- [ziio2110](https://github.com/ziio2110) for first identifying 100 chat limit, [iomari](https://github.com/iomari) and [JackyTJie](https://github.com/JackyTJie) for confirming.
+- [JackyTJie](https://github.com/JackyTJie) for helping to further investigate the 100 chat limit and proposing a fix that pointed us in the right direction.
+- [m-tommy](https://github.com/m-tommy) for identifying DeepSeek's new message format and contributing the fix for empty Markdown and text exports ([#9](https://github.com/agoramachina/deepseek-exporter/pull/9)).
+- [scenaristeur](https://github.com/scenaristeur) for independently finding and fixing the same empty-export bug ([#10](https://github.com/agoramachina/deepseek-exporter/pull/10)).
+- [AGGAS-Combustion](https://github.com/AGGAS-Combustion) for reporting the empty text exports ([#8](https://github.com/agoramachina/deepseek-exporter/issues/8)).
+- [spinnyspider](https://github.com/spinnyspider) for renaming the README so it renders properly, and for improving the installation instructions ([#3](https://github.com/agoramachina/deepseek-exporter/pull/3)).
+- [Jackdaloo](https://github.com/Jackdaloo) for reporting Markdown formula rendering ([#7](https://github.com/agoramachina/deepseek-exporter/issues/7)) and requesting a remembered export format ([#5](https://github.com/agoramachina/deepseek-exporter/issues/5)).
 ---
