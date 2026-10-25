@@ -34,6 +34,9 @@
 
 ## Completed ✅
 
+- **Remember the export format** (v1.4.3, [#5](https://github.com/agoramachina/deepseek-exporter/issues/5), [PR #6](https://github.com/agoramachina/deepseek-exporter/pull/6) by @webbrain-one)
+  - Popup and browse page share one saved preference (`rememberExportFormat()` in `utils.js`, with tests)
+
 - **First automated release: v1.4.2** (2026-10-24)
   - Tag push → Chrome Web Store + Firefox Add-ons + GitHub release, all succeeded
   - Lesson: the first Chrome attempt got a 403 until the service account was set up in the Chrome Web Store dashboard (Account → service accounts); then "Re-run failed jobs" finished the release without re-tagging. `chrome-publish.sh` now prints the store's error message on failure

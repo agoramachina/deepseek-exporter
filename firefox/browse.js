@@ -511,9 +511,8 @@ function setupExportOptions() {
     }
   }
 
-  formatSelect.addEventListener('change', updateStates);
   includeChats.addEventListener('change', updateStates);
-  updateStates();
+  rememberExportFormat(formatSelect, updateStates);
 }
 
 // ---- Init ----

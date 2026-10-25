@@ -131,5 +131,6 @@ Feel free to submit issues or pull requests if you find bugs or have suggestions
 - [scenaristeur](https://github.com/scenaristeur) for independently finding and fixing the same empty-export bug ([#10](https://github.com/agoramachina/deepseek-exporter/pull/10)).
 - [AGGAS-Combustion](https://github.com/AGGAS-Combustion) for reporting the empty text exports ([#8](https://github.com/agoramachina/deepseek-exporter/issues/8)).
 - [spinnyspider](https://github.com/spinnyspider) for renaming the README so it renders properly, and for improving the installation instructions ([#3](https://github.com/agoramachina/deepseek-exporter/pull/3)).
+- [webbrain-one](https://github.com/webbrain-one) for implementing the remembered export format ([#6](https://github.com/agoramachina/deepseek-exporter/pull/6)).
 - [Jackdaloo](https://github.com/Jackdaloo) for reporting Markdown formula rendering ([#7](https://github.com/agoramachina/deepseek-exporter/issues/7)) and requesting a remembered export format ([#5](https://github.com/agoramachina/deepseek-exporter/issues/5)).
 ---

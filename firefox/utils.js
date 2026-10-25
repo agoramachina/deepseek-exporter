@@ -126,6 +126,23 @@ function convertToText(data, includeMetadata, includeThinking = true) {
   return text.trim();
 }
 
+// Remember the chosen export format, shared by the popup and the browse page.
+// Restores the saved value (if it's still a valid option), saves every change,
+// and calls onChange both after restoring and after each change.
+function rememberExportFormat(select, onChange) {
+  chrome.storage.local.get('deepseekExportFormat', (result) => {
+    const saved = result && result.deepseekExportFormat;
+    if (saved && Array.from(select.options).some(o => o.value === saved)) {
+      select.value = saved;
+    }
+    onChange();
+  });
+  select.addEventListener('change', () => {
+    chrome.storage.local.set({ deepseekExportFormat: select.value });
+    onChange();
+  });
+}
+
 // Make a chat title safe to use as a filename
 function sanitizeFilename(name) {
   const safe = String(name || '')
@@ -182,6 +199,7 @@ if (typeof module !== 'undefined' && module.exports) {
     convertToMarkdown,
     convertToText,
     sanitizeFilename,
+    rememberExportFormat,
     uniqueFilename,
     getLocalDateTimeString,
     downloadFile,

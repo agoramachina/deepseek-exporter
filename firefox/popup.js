@@ -47,9 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  formatSelect.addEventListener('change', updateCheckboxStates);
   includeChatsCheckbox.addEventListener('change', updateCheckboxStates);
-  updateCheckboxStates(); // Initialize on load
+  rememberExportFormat(formatSelect, updateCheckboxStates); // restores the saved format, then initializes
 });
 
 // Export current chat

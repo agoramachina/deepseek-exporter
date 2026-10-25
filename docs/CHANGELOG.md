@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.4.3]
+
+- **The export format is remembered** ([#5](https://github.com/agoramachina/deepseek-exporter/issues/5)). Pick Markdown, JSON or text once and it stays selected the next time you open the popup or the browse page, and the two always agree. Thanks to [@webbrain-one](https://github.com/webbrain-one) for the browse-page implementation ([PR #6](https://github.com/agoramachina/deepseek-exporter/pull/6)); extended to the popup and Firefox via a shared `rememberExportFormat()` helper, which also ignores a saved format that's no longer an option.
+
 ## [1.4.2]
 
 - **Fixed Markdown and plain-text exports coming out empty.** DeepSeek moved message text from the flat `content` / `thinking_content` fields into a typed `fragments` array (`REQUEST`, `SEARCH`, `THINK`, `RESPONSE`), so exports contained only the `User:` / `DeepSeek:` labels. New `getMessageContent()` / `getMessageThinking()` read the fragments (search results are skipped) and fall back to the old fields. JSON exports were unaffected. Thanks to [@m-tommy](https://github.com/m-tommy) ([PR #9](https://github.com/agoramachina/deepseek-exporter/pull/9)).

@@ -10,6 +10,7 @@ const {
   sanitizeFilename,
   uniqueFilename,
   getLocalDateTimeString,
+  rememberExportFormat,
 } = utils;
 
 // Minimal DeepSeek history_messages payload: a root exchange, then two
@@ -233,5 +234,47 @@ describe('fragment-format messages (PR #9)', () => {
     expect(md).toContain('Four.');
 
     expect(convertToText(data, false, false)).toBe('User: What is 2+2?\n\nDeepSeek: Four.');
+  });
+});
+
+// PR #6 / issue #5: the popup and browse page remember the chosen export format
+describe('rememberExportFormat', () => {
+  function setup(saved) {
+    const store = saved === undefined ? {} : { deepseekExportFormat: saved };
+    globalThis.chrome = { storage: { local: {
+      get: (key, cb) => cb({ [key]: store[key] }),
+      set: (obj) => Object.assign(store, obj),
+    } } };
+    const listeners = {};
+    const select = {
+      value: 'text',
+      options: [{ value: 'json' }, { value: 'markdown' }, { value: 'text' }],
+      addEventListener: (ev, fn) => { listeners[ev] = fn; },
+    };
+    let calls = 0;
+    rememberExportFormat(select, () => { calls++; });
+    return { store, select, fire: (ev) => listeners[ev](), calls: () => calls };
+  }
+
+  it('restores a saved format and initializes once', () => {
+    const t = setup('markdown');
+    expect(t.select.value).toBe('markdown');
+    expect(t.calls()).toBe(1);
+  });
+
+  it('keeps the default when nothing is saved', () => {
+    expect(setup(undefined).select.value).toBe('text');
+  });
+
+  it('ignores a saved value that is no longer an option', () => {
+    expect(setup('pdf').select.value).toBe('text');
+  });
+
+  it('saves the format on every change and re-runs the state logic', () => {
+    const t = setup(undefined);
+    t.select.value = 'json';
+    t.fire('change');
+    expect(t.store.deepseekExportFormat).toBe('json');
+    expect(t.calls()).toBe(2);
   });
 });
