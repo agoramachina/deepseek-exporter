@@ -8,11 +8,6 @@
 
 ### Medium Priority 🟡
 
-- **Verify automated store uploads on the first real tagged release**
-  - The release workflow now submits to the Chrome Web Store and AMO, but the store jobs have only been tested against stubbed responses
-  - Watch the first tag's run; if a store job fails, fix it and use "Re-run failed jobs"
-  - Follow-ups: pass CHANGELOG notes to AMO (`--amo-metadata`), and optionally attach AMO's signed .xpi to the GitHub release once it's approved
-
 - **"Chat" checkbox is vestigial**
   - Unchecking it disables the Thinking/Metadata options, but no converter reads `includeChats`, so chats are exported regardless
   - Leftover from the Claude Exporter port (where it toggles chat text vs. artifacts-only). Either remove it from popup + browse, or give it a meaning
@@ -38,6 +33,11 @@
   - Bulk export fetches every chat 300–500 ms apart with no backoff. Add retry with exponential backoff on errors or rate-limit responses, and slightly randomized delays
 
 ## Completed ✅
+
+- **First automated release: v1.4.2** (2026-10-24)
+  - Tag push → Chrome Web Store + Firefox Add-ons + GitHub release, all succeeded
+  - Lesson: the first Chrome attempt got a 403 until the service account was set up in the Chrome Web Store dashboard (Account → service accounts); then "Re-run failed jobs" finished the release without re-tagging. `chrome-publish.sh` now prints the store's error message on failure
+  - Follow-ups: pass CHANGELOG notes to AMO (`--amo-metadata`); optionally attach AMO's signed .xpi to the GitHub release
 
 - **100-chat limit gone** (v1.4.2, [issue #1](https://github.com/agoramachina/deepseek-exporter/issues/1))
   - DeepSeek's `fetch_page` cursor works again server-side; verified 2026-10-24 with a 109-chat export in all three formats. No code change needed
